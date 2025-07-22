@@ -7,25 +7,37 @@ const ForgotPassword = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!email) {
+    setMessage('Please enter your email');
+    return;
+  }
 
-    try {
-      const res = await fetch('http://localhost:5000/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+  setLoading(true);
+  setMessage('');
 
-      const data = await res.json();
-      setMessage(data.message);
-    } catch {
-      setMessage('Failed to send reset email');
+  try {
+    const res = await fetch('http://localhost:5000/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+    
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to send reset email');
     }
 
+    setMessage(data.message || 'Reset email sent successfully');
+  } catch (err) {
+    setMessage(err.message || 'Failed to send reset email');
+  } finally {
     setLoading(false);
-  };
+  }
+};
 
   return (
     <div className="user-login-wrapper">

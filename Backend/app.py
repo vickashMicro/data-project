@@ -25,6 +25,9 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 EMAIL_SENDER = os.environ.get('EMAIL_SENDER')
 EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
 
+SMTP_SERVER = os.environ.get('SMTP_SERVER')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', 465))  # Convert to int, default to 465
+
 # === DB Connection ===
 def get_db():
     return mysql.connector.connect(
@@ -183,39 +186,62 @@ def get_users():
 # === Forgot Password ===
 @app.route("/forgot-password", methods=["POST"])
 def forgot_password():
-    email = request.json.get("email")
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM user WHERE email=%s", (email,))
-    user = cursor.fetchone()
-    if not user:
-        cursor.close()
-        db.close()
-        return jsonify({"success": False, "message": "Email not found"}), 404
-
-    token = secrets.token_urlsafe(32)
-    cursor.execute("UPDATE user SET reset_token=%s WHERE email=%s", (token, email))
-    db.commit()
-
-    reset_link = f"http://localhost:5173/reset-password?token={token}"
-
-    print("Password reset link:", reset_link)
-
-    msg = MIMEText(f"Click this link to reset your password:\n\n{reset_link}")
-    msg["Subject"] = "Password Reset"
-    msg["From"] = EMAIL_SENDER
-    msg["To"] = email
-
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
-            server.sendmail(EMAIL_SENDER, email, msg.as_string())
-        return jsonify({"success": True, "message": "Reset email sent"})
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+
+        email = data.get("email")
+        if not email:
+            return jsonify({"success": False, "message": "Email is required"}), 400
+
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM user WHERE email=%s", (email,))
+        user = cursor.fetchone()
+        
+        if not user:
+            cursor.close()
+            db.close()
+            return jsonify({"success": False, "message": "Email not found"}), 404
+
+        # Generate token and save to database
+        token = secrets.token_urlsafe(32)
+        cursor.execute("UPDATE user SET reset_token=%s WHERE email=%s", (token, email))
+        db.commit()
+
+        # Create reset link
+        reset_link = f"http://localhost:5173/reset-password?token={token}"
+
+        # Create email message
+        msg = MIMEText(f"""Click this link to reset your password:
+        
+        {reset_link}
+        
+        If you didn't request this, please ignore this email.""")
+        msg["Subject"] = "Password Reset Request"
+        msg["From"] = EMAIL_SENDER
+        msg["To"] = email
+
+        # Send email
+        try:
+            with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
+                server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+                server.sendmail(EMAIL_SENDER, email, msg.as_string())
+            return jsonify({"success": True, "message": "Reset email sent"})
+            
+        except smtplib.SMTPAuthenticationError:
+            return jsonify({"success": False, "message": "Email server authentication failed"}), 500
+        except Exception as e:
+            return jsonify({"success": False, "message": f"Failed to send email: {str(e)}"}), 500
+
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
     finally:
-        cursor.close()
-        db.close()
+        if 'cursor' in locals():
+            cursor.close()
+        if 'db' in locals():
+            db.close()
 
 @app.route("/reset-password", methods=["POST"])
 def reset_password():
@@ -1414,17 +1440,17 @@ def save_format_two():
         cur.execute(f"""
         CREATE TABLE IF NOT EXISTS `{table_name}` (
           id INT AUTO_INCREMENT PRIMARY KEY,
-          batch_number VARCHAR(8) NOT NULL,
-          zone_code VARCHAR(1) NOT NULL,
-          emp_number VARCHAR(6) NOT NULL,
-          member_number VARCHAR(6) NOT NULL,
-          last_name VARCHAR(60),
-          initials VARCHAR(10),
-          id_number VARCHAR(12),
-          id_status VARCHAR(1),
-          mem_status VARCHAR(1),
-          operation_code VARCHAR(1),
-          full_name VARCHAR(100),
+          batch_number VARCHAR(8) NOT NULL,        /* Positions 1-8 */
+          zone_code VARCHAR(1) NOT NULL,           /* Position 9 */
+          emp_number VARCHAR(6) NOT NULL,          /* Positions 10-15 */
+          member_number VARCHAR(6) NOT NULL,       /* Positions 16-21 */
+          last_name VARCHAR(40),                   /* Positions 22-61 (40 chars) */
+          initials VARCHAR(20),                    /* Positions 62-81 (20 chars) */
+          id_number VARCHAR(12),                   /* Positions 82-93 (12 chars) */
+          id_status VARCHAR(1),                    /* Position 94 */
+          mem_status VARCHAR(1),                   /* Position 95 */
+          operation_code VARCHAR(1),               /* Position 96 */
+          full_name VARCHAR(100),                  /* Positions 97-196 (100 chars) */
           modified_by VARCHAR(50),
           modified_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           UNIQUE KEY unique_member (batch_number, zone_code, emp_number, member_number)
@@ -1436,24 +1462,26 @@ def save_format_two():
         now = datetime.datetime.now()
 
         for row in rows:
-            # Extract and format data
-            batch_number = str(row.get('batchNumber', '')).strip().ljust(8)[:8]
-            zone_code = str(row.get('zoneCode', '')).strip().ljust(1)[:1]
-            emp_number = str(row.get('empNumber', '')).strip().ljust(6)[:6]
-            member_number = str(row.get('memNumber', '')).strip().ljust(6)[:6]
-            last_name = str(row.get('lastName', '')).strip().ljust(60)[:60]
-            initials = str(row.get('initials', '')).strip().ljust(10)[:10]  # NEW FIELD
+            # Extract and format data with fixed-width formatting
+            batch_number = str(row.get('batchNumber', '')).strip().ljust(8)[:8]       # Positions 1-8 (8 chars)
+            zone_code = str(row.get('zoneCode', '')).strip().ljust(1)[:1]             # Position 9 (1 char)
+            emp_number = str(row.get('empNumber', '')).strip().ljust(6)[:6]           # Positions 10-15 (6 chars)
+            member_number = str(row.get('memNumber', '')).strip().ljust(6)[:6]        # Positions 16-21 (6 chars)
+            last_name = str(row.get('lastName', '')).strip().ljust(40)[:40]          # Positions 22-61 (40 chars)
+            initials = str(row.get('initials', '')).strip().ljust(20)[:20]            # Positions 62-81 (20 chars)
+            
+            # Special handling for ID number (Positions 82-93)
             id_number = str(row.get('idNumber', '')).strip()
             if not id_number:
-                id_number = '000000000000'
+                id_number = '000000000000'  # Default empty ID
             elif len(id_number) == 9:
-                id_number = '000' + id_number
-                id_number = id_number.ljust(12)[:12]
-
-            id_status = str(row.get('idStatus', '')).strip().ljust(1)[:1]
-            mem_status = str(row.get('memStatus', '')).strip().ljust(1)[:1]
-            operation_code = str(row.get('operationCode', '')).strip().ljust(1)[:1]
-            full_name = str(row.get('fullName', '')).strip().ljust(100)[:100]
+                id_number = '000' + id_number  # Pad 9-digit IDs with leading zeros
+            id_number = id_number.ljust(12)[:12]  # Ensure exactly 12 chars
+            
+            id_status = str(row.get('idStatus', '')).strip().ljust(1)[:1]            # Position 94 (1 char)
+            mem_status = str(row.get('memStatus', '')).strip().ljust(1)[:1]           # Position 95 (1 char)
+            operation_code = str(row.get('operationCode', '')).strip().ljust(1)[:1]   # Position 96 (1 char)
+            full_name = str(row.get('fullName', '')).strip().ljust(100)[:100]        # Positions 97-196 (100 chars)
 
             # Check if record exists
             cur.execute(f"""
@@ -1527,8 +1555,6 @@ def save_format_two():
             cur.close()
         if db:
             db.close()
-
-
 
 @app.route('/get-mfile-row-count', methods=['GET'])
 def get_mfile_row_count():
@@ -1622,7 +1648,7 @@ def download_mfile():
                 str(record['zone_code']).strip().ljust(1)[:1] +        # 8
                 str(record['emp_number']).strip().ljust(6)[:6] +       # 9-14
                 str(record['member_number']).strip().ljust(6)[:6] +    # 15-20
-                str(record['last_name']).strip().ljust(60)[:60] +      # 21-80
+                str(record['last_name']).strip().ljust(40)[:40] +      # 21-80
                 str(record['initials']).strip().ljust(20)[:20] +       # 81-100
                 str(record['id_number']).strip().ljust(12)[:12] +      # 101-112
                 str(record['id_status']).strip().ljust(1)[:1] +        # 113

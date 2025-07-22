@@ -1,0 +1,14 @@
+Batch: 2025076
+Group: B050404
+
+Members:
+000001|DEEPA KUMARI P|756140973|
+000002|KALYANI Y W|687490940|
+000003|ENAT W R|718154804|
+000004|SOMARATHNA Y H G N D|815070437|
+
+Contributions:
+202409|6|16.0|MADUSANKA NISHPADANA                    NO. 94/C/2                              KOONGAHATANNA                           THUNNANA, HANWELLA.
+202411|6|16.0|MADUSANKA NISHPADANA                    NO. 94/C/2                              KOONGAHATANNA                           THUNNANA, HANWELLA.
+202412|6|16.0|MADUSANKA NISHPADANA                    NO. 94/C/2                              KOONGAHATANNA                           THUNNANA, HANWELLA.
+202501|6|16.0|MADUSANKA NISHPADANA                    NO. 94/C/2                              KOONGAHATANNA                           THUNNANA, HANWELLA.

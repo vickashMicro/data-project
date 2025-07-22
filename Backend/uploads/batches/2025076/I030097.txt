@@ -1,0 +1,8 @@
+Batch: 2025076
+Group: I030097
+
+Members:
+
+Contributions:
+202410|6|631.55|
+202411|6|754.06|

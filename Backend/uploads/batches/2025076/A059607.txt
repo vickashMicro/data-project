@@ -1,0 +1,12 @@
+Batch: 2025076
+Group: A059607
+
+Members:
+
+Contributions:
+202408|6|45.0|A G C INNOVATE (PRIVATE) LIMITED        NO 34                                   WARD PLACE                              COLOMBO 07
+202409|6|150.0|A G C INNOVATE (PRIVATE) LIMITED        NO 34                                   WARD PLACE                              COLOMBO 07
+202410|6|150.0|A G C INNOVATE (PRIVATE) LIMITED        NO 34                                   WARD PLACE                              COLOMBO 07
+202411|6|216.6667|A G C INNOVATE (PRIVATE) LIMITED        NO 34                                   WARD PLACE                              COLOMBO 07
+202412|6|250.0|A G C INNOVATE (PRIVATE) LIMITED        NO 34                                   WARD PLACE                              COLOMBO 07
+202501|6|250.0|A G C INNOVATE (PRIVATE) LIMITED        NO 34                                   WARD PLACE                              COLOMBO 07

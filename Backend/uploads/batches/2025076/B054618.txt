@@ -1,0 +1,10 @@
+Batch: 2025076
+Group: B054618
+
+Members:
+000001|BABU H M A|872680241|
+000002|SAFRIN M I M|200618004094|
+000003|SHAJITH M S M|200333912980|
+
+Contributions:
+202502|6|86.0|HARAJ MARKET (PVT) LTD                  NO 407                                  GALLE ROAD                              MOUNT LAVINIA

@@ -1,0 +1,313 @@
+/* Modern CSS with variables and improved styling */
+:root {
+  --primary: #3ccc6c;
+  --secondary: #eaf3ec;
+  --accent: #f67280;
+  --background: #fffcee;
+  --card-bg: #ffffff;
+  --text-dark: #2a2f4a;
+  --text-light: #f5f5f5;
+  --online: #4caf50;
+  --offline: #f44336;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --border-radius: 8px;
+}
+
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Full page layout */
+.user-home-page {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background);
+  overflow: hidden;
+  color: var(--text-dark);
+}
+
+/* Modern NavBar styling */
+.user-home-navbar {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 10;
+}
+
+.user-home-navbar-left {
+  display: flex;
+  gap: 1rem;
+}
+
+.user-home-nav-button {
+  background-color: transparent;
+  color: var(--text-dark);
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1.2rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.user-home-nav-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-home-nav-button.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.user-home-nav-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  height: 2px;
+  background-color: var(--accent);
+}
+
+.nav-icon {
+  font-size: 0.9rem;
+}
+
+.chevron {
+  font-size: 0.7rem;
+  margin-left: 0.3rem;
+}
+
+/* Enhanced Dropdown menu */
+.user-home-dropdown {
+  position: relative;
+}
+
+.user-home-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  padding: 0.5rem 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+
+.user-home-dropdown-item {
+  background: none;
+  border: none;
+  color: var(--text-dark);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-home-dropdown-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--primary);
+}
+
+/* Right section with status indicator */
+.user-home-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-name-display {
+  background-color: var(--primary);
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  box-shadow: var(--shadow-sm);
+}
+
+
+.user-home-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.user-home-status.online {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: var(--online);
+}
+
+.user-home-status.offline {
+  background-color: rgba(244, 67, 54, 0.15);
+  color: var(--offline);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.user-home-status.online .status-indicator {
+  background-color: var(--online);
+  animation: pulse 2s infinite;
+}
+
+.user-home-status.offline .status-indicator {
+  background-color: var(--offline);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.user-home-logout {
+  background: none;
+  border: none;
+  color: var(--text-dark);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-home-logout:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--accent);
+  transform: rotate(15deg);
+}
+
+/* Main content section */
+.user-home-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--background);
+  padding: 2rem;
+  position: relative;
+}
+
+.content-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.user-home-image {
+  max-width: 90%;
+  max-height: 60%;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  object-fit: contain;
+  transition: var(--transition);
+}
+
+.user-home-image:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.welcome-message {
+  text-align: center;
+  max-width: 600px;
+}
+
+.welcome-message h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--primary);
+}
+
+.welcome-message p {
+  font-size: 1rem;
+  color: var(--text-dark);
+  opacity: 0.8;
+}
+
+.data-entry-placeholder {
+  background-color: var(--card-bg);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+.data-entry-placeholder h2 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .user-home-navbar {
+    padding: 0.75rem;
+  }
+  
+  .user-home-nav-button {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .nav-icon, .chevron {
+    display: none;
+  }
+  
+  .user-home-content {
+    padding: 1rem;
+  }
+}

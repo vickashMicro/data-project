@@ -1,0 +1,9 @@
+Batch: 2025076
+Group: A054015
+
+Members:
+000001|NASRULLAH M Z M|801273181|
+000002|FALEEL M F M F|820022386|
+
+Contributions:
+202502|6|54.0|BEAUTY GEMS                             NO. 9/A                                 ST. ALBUS PLACE                         COLOMBO - 04

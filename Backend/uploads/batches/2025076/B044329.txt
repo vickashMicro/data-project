@@ -1,0 +1,12 @@
+Batch: 2025076
+Group: B044329
+
+Members:
+000001|SUNANDA H I S||1
+000004|YOBIKANNAN R||1
+000008|HEMANTHA R M S||1
+000009|KUMARA R M S||1
+
+Contributions:
+202412|6|42.0|LENADUWA LOKUGE NISHANTHA KUMARA        NO 631,                                 AVISSAWELLA ROAD,                       MULLERIYAWA.
+202501|6|42.0|LENADUWA LOKUGE NISHANTHA KUMARA        NO 631,                                 AVISSAWELLA ROAD,                       MULLERIYAWA.

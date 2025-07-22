@@ -1,0 +1,64 @@
+/* Remove the old styles and replace with these */
+
+.user-details-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+  position: relative;
+}
+
+.user-details-heading {
+  color: var(--text-color);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.download-button {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.2s;
+}
+
+.download-button:hover {
+  background-color: var(--secondary-color);
+}
+
+.user-details-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.user-details-table th,
+.user-details-table td {
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.user-details-table th {
+  background-color: var(--content-bg);
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.user-details-table tr:nth-child(even) {
+  background-color: rgba(245, 250, 248, 0.5);
+}
+
+.user-details-table tr:hover {
+  background-color: rgba(74, 165, 134, 0.05);
+}

@@ -1,0 +1,18 @@
+Batch: 2025076
+Group: B038048
+
+Members:
+000001|NILANTHI FERNAND V K B T|747631778|9
+000002|PURNA PRADEEP S L|850960518|9
+000003|DILAN MADUSHNKA PIRIS T|870441703|1
+000004|GAYAN S A N|893191488|9
+000005|CHATHURANYA R M A|892520615|
+000006|ABERATNA G A U N|920232515|
+000007|CHANDANA R A C K||
+
+Contributions:
+202411|6|126.0|SUNIL CUTTERS                           NO.15/1A, SHALAWA ROAD                  ABULDENIYA                              UDAHAMULLA
+202412|6|126.0|SUNIL CUTTERS                           NO.15/1A, SHALAWA ROAD                  ABULDENIYA                              UDAHAMULLA
+202501|6|126.0|SUNIL CUTTERS                           NO.15/1A, SHALAWA ROAD                  ABULDENIYA                              UDAHAMULLA
+202502|6|84.0|SUNIL CUTTERS                           NO.15/1A, SHALAWA ROAD                  ABULDENIYA                              UDAHAMULLA
+202503|6|84.0|SUNIL CUTTERS                           NO.15/1A, SHALAWA ROAD                  ABULDENIYA                              UDAHAMULLA

@@ -1,0 +1,12 @@
+Batch: 2025076
+Group: B054622
+
+Members:
+000001|THAKSHILA W A G|199852903040|
+000002|WIMALACHANDRA H M S J|199966804121|
+000003|THARAKA D G G|960503627|
+
+Contributions:
+202407|6|300.0|RAINBOW GLOBAL EDUCATION (PVT) LTD      NO 97                                   MAIN STREET                             BATTARAMULLA
+202408|6|300.0|RAINBOW GLOBAL EDUCATION (PVT) LTD      NO 97                                   MAIN STREET                             BATTARAMULLA
+202409|6|300.0|RAINBOW GLOBAL EDUCATION (PVT) LTD      NO 97                                   MAIN STREET                             BATTARAMULLA

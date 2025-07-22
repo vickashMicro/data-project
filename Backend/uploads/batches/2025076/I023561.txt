@@ -1,0 +1,10 @@
+Batch: 2025076
+Group: I023561
+
+Members:
+000001|THILAKARATHNA S||1
+000002|NIROSHAN G|960990072|
+000003|THILAKARATHNAM S|701631510|
+
+Contributions:
+202406|6|264.0|NIROSHAN MOTORS                         R GNANENDRAN,                           NO. 318/A ,COLOMBO ROAD                 WATTALA

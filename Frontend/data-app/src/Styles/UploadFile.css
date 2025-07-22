@@ -1,0 +1,117 @@
+.upload-page {
+  padding: 40px;
+  background-color: var(--content-bg);
+  min-height: 10vh;
+  margin-left: 0px;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* This centers child elements horizontally */
+}
+
+.upload-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #2f855a;
+  margin-bottom: 20px;
+  text-align: center; /* Center the title text */
+}
+
+.drop-area {
+  border: 2px dashed var(--accent-color);
+  background-color: rgb(240, 240, 240);
+  padding: 40px;
+  text-align: center;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  transition: background 0.3s;
+  cursor: pointer;
+  width: 100%;
+  max-width: 600px; /* Maximum width */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.drop-area:hover {
+  background-color: #959995;
+}
+
+.drop-area p {
+  color: black;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+/* Remove the browse button styles */
+.browse-btn {
+  display: none;
+}
+
+.upload-submit-btn {
+  display: block;
+  margin: 20px auto;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: auto;
+  max-width: 200px;
+}
+
+.upload-submit-btn:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.file-table {
+  width: 100%;
+  max-width: 800px; /* Added max-width for table */
+  margin-top: 30px;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.file-table th,
+.file-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.file-table th {
+  background-color: var(--topbar-bg);
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.file-table td a {
+  color: var(--primary-color);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.file-preview-list {
+  margin-top: 20px;
+  text-align: left;
+  padding-left: 20px;
+  list-style: disc;
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
+.upload-page .file-table {
+  margin-top: 40px;
+}
+
+/* Hide the file input but keep it functional */
+.hidden-file-input {
+  display: none;
+}

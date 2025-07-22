@@ -1,0 +1,10 @@
+Batch: 2025076
+Group: P013962
+
+Members:
+000001|MADHUSANI P S C|966703903|1
+000002|MALARNADI R||1
+000003|DIKKUMBURA D K H P||1
+
+Contributions:
+202502|6|84.0|RATHNAYAKA SUPER                        NO:484/1                                THOMAS FERNANDO MAWATHA                 WENNAPPUWA

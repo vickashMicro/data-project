@@ -1,0 +1,11 @@
+Batch: 2025076
+Group: A030907
+
+Members:
+000001|P BALA CHANDRAN|742853241|1
+000002|SELVAKUMAR T|197428503241|
+000005|SELVAKUMAR T||
+
+Contributions:
+202501|6|70.0|MICRO TEX                               122/03/A                                KEYZER STREET                           COLOMBO 11
+202502|6|70.0|MICRO TEX                               122/03/A                                KEYZER STREET                           COLOMBO 11

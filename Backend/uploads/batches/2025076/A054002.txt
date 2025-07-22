@@ -1,0 +1,10 @@
+Batch: 2025076
+Group: A054002
+
+Members:
+000001|DISTHIKAR M N M|198032204315|
+000002|SAFNAS M S M|911310800|
+000003|IKRAM A A M|940954355|
+
+Contributions:
+202502|6|42.0|ALOKA INTERNATIONAL TRADE               NO. 37/5                                2ND CROSS STREET                        COLOMBO - 11

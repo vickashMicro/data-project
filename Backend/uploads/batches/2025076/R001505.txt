@@ -1,0 +1,11 @@
+Batch: 2025076
+Group: R001505
+
+Members:
+000001|SARUK M M||9
+000002|MINILAR F M M||9
+000003|SAHIK S M||9
+000004|LAFIR W M|703501133|1
+
+Contributions:
+202502|6|30.0|NEW RAADO JEWELLERS                     C/O MR V T MACKIN                       NO.35, MAIN STREET                      KADURUWELA

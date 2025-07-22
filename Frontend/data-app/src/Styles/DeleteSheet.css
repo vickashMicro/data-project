@@ -1,0 +1,181 @@
+/* Main Container */
+.delete-sheet-container {
+  background-color: #fff8f8;
+  padding: 20px;
+  max-width: 700px;
+  margin: 100px auto;
+  border-radius: 17px;
+  box-shadow: 0 5px 8px rgba(0,0,0,0.1);
+}
+
+/* Title */
+.delete-sheet-title {
+  color: #d32f2f;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+/* Form Elements */
+.delete-sheet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px;
+}
+
+.delete-sheet-label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: #333;
+  gap: 5px;
+}
+
+.delete-sheet-select {
+  background-color: #ffebee;
+  color: #333;
+  padding: 10px 12px;
+  border: 1px solid #ffcdd2;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.delete-sheet-select:focus {
+  outline: none;
+  border-color: #d32f2f;
+  box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+}
+
+/* Buttons */
+.delete-sheet-btn {
+  background-color: #d32f2f;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: all 0.3s ease;
+  align-self: center;
+  width: 200px;
+}
+
+.delete-sheet-btn:hover {
+  background-color: #b71c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(183, 28, 28, 0.3);
+}
+
+.delete-sheet-btn:disabled {
+  background-color: #9e9e9e;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Messages */
+.delete-sheet-error {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 20px;
+  text-align: center;
+  border-left: 4px solid #d32f2f;
+}
+
+.delete-sheet-success {
+  color: #388e3c;
+  background-color: #e8f5e9;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 20px;
+  text-align: center;
+  border-left: 4px solid #388e3c;
+}
+
+/* Modal Styles */
+.delete-sheet-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.delete-sheet-modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.delete-sheet-modal-content h3 {
+  color: #d32f2f;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.delete-sheet-modal-content p {
+  margin-bottom: 25px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.delete-sheet-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.delete-sheet-cancel-btn {
+  background-color: #757575;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  width: 100px;
+}
+
+.delete-sheet-cancel-btn:hover {
+  background-color: #616161;
+  transform: translateY(-2px);
+}
+
+.delete-sheet-confirm-btn {
+  background-color: #d32f2f;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  width: 100px;
+}
+
+.delete-sheet-confirm-btn:hover {
+  background-color: #b71c1c;
+  transform: translateY(-2px);
+}

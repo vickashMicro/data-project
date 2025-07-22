@@ -1,0 +1,16 @@
+Batch: 2025076
+Group: P012320
+
+Members:
+000001|FERNANDO W P P|198435701867|
+000002|FERNANDO C D L|818013337|
+
+Contributions:
+202310|6|57.0|RIVORICH HOTEL                          ST. JUSEVAS STREET                      WAIKKALA
+202311|6|57.0|RIVORICH HOTEL                          ST. JUSEVAS STREET                      WAIKKALA
+202312|6|57.0|RIVORICH HOTEL                          ST. JUSEVAS STREET                      WAIKKALA
+202401|6|57.0|RIVORICH HOTEL                          ST. JUSEVAS STREET                      WAIKKALA
+202402|6|57.0|RIVORICH HOTEL                          ST. JUSEVAS STREET                      WAIKKALA
+202403|6|57.0|RIVORICH HOTEL                          ST. JUSEVAS STREET                      WAIKKALA
+202404|6|57.0|RIVORICH HOTEL                          ST. JUSEVAS STREET                      WAIKKALA
+202405|6|57.0|RIVORICH HOTEL                          ST. JUSEVAS STREET                      WAIKKALA

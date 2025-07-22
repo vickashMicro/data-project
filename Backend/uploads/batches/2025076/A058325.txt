@@ -1,0 +1,10 @@
+Batch: 2025076
+Group: A058325
+
+Members:
+000001|RAFI M M M|822342000|
+000002|BUHARI M|613664823|
+000003|RIYAS M H M|802450427|
+
+Contributions:
+202502|6|129.0|T C L DEVELOPMENT                       NO 18                                   MESSENGER STREET                        COLOMBO 12

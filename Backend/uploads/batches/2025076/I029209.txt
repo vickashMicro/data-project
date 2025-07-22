@@ -1,0 +1,21 @@
+Batch: 2025076
+Group: I029209
+
+Members:
+000001|UDUKUMBURA U S P|873602376|
+000002|KARUNATHILAKA T V H|931390970|
+000003|SARATHCHANDRA K P G S|946240273|
+000004|VIRAN W V L|942980132|
+000005|SITHMINI K R I|965141014|
+000006|PATHIRANA W P S C|953083213|
+000007|SANDARUWAN E A T|981491297|
+000008|MADHURANGA K B C|199803701964|
+000009|DILHAN I P S|972984523|
+
+Contributions:
+202409|6|180.0|NIPPON SOLAR (PVT) LTD                  NO.58/1                                 MAKOLA NORTH                            MAKOLA
+202410|6|180.0|NIPPON SOLAR (PVT) LTD                  NO.58/1                                 MAKOLA NORTH                            MAKOLA
+202411|6|180.0|NIPPON SOLAR (PVT) LTD                  NO.58/1                                 MAKOLA NORTH                            MAKOLA
+202412|6|180.0|NIPPON SOLAR (PVT) LTD                  NO.58/1                                 MAKOLA NORTH                            MAKOLA
+202501|6|180.0|NIPPON SOLAR (PVT) LTD                  NO.58/1                                 MAKOLA NORTH                            MAKOLA
+202502|6|180.0|NIPPON SOLAR (PVT) LTD                  NO.58/1                                 MAKOLA NORTH                            MAKOLA

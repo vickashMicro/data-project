@@ -1,0 +1,21 @@
+Batch: 2025076
+Group: A058636
+
+Members:
+000001|PRADEEPAN G|901333637|
+000002|JASMINRAJ A|962981038|
+000003|NICHOLAS S N|850204918|
+000004|WEERASINGEH S K|820363159|
+000005|WIJETHUNGA D G N M|962624138|
+
+Contributions:
+202404|6|175.0|AYUSANU GLOBAL (PVT) LTD                NO 60/28A                               TORRINGTON AVENUE                       COLOMBO 07
+202405|6|175.0|AYUSANU GLOBAL (PVT) LTD                NO 60/28A                               TORRINGTON AVENUE                       COLOMBO 07
+202406|6|175.0|AYUSANU GLOBAL (PVT) LTD                NO 60/28A                               TORRINGTON AVENUE                       COLOMBO 07
+202407|6|175.0|AYUSANU GLOBAL (PVT) LTD                NO 60/28A                               TORRINGTON AVENUE                       COLOMBO 07
+202408|6|175.0|AYUSANU GLOBAL (PVT) LTD                NO 60/28A                               TORRINGTON AVENUE                       COLOMBO 07
+202409|6|210.0|AYUSANU GLOBAL (PVT) LTD                NO 60/28A                               TORRINGTON AVENUE                       COLOMBO 07
+202410|6|210.0|AYUSANU GLOBAL (PVT) LTD                NO 60/28A                               TORRINGTON AVENUE                       COLOMBO 07
+202411|6|210.0|AYUSANU GLOBAL (PVT) LTD                NO 60/28A                               TORRINGTON AVENUE                       COLOMBO 07
+202412|6|210.0|AYUSANU GLOBAL (PVT) LTD                NO 60/28A                               TORRINGTON AVENUE                       COLOMBO 07
+202501|6|210.0|AYUSANU GLOBAL (PVT) LTD                NO 60/28A                               TORRINGTON AVENUE                       COLOMBO 07

@@ -1,0 +1,11 @@
+Batch: 2025076
+Group: A057630
+
+Members:
+000001|THILLAINATHAN S|811741469|
+000002|ABISHEK R M|963221800|
+000003|SIVAKUMAR S|200118901905|
+
+Contributions:
+202401|6|172.0|SUDA JEWELLERY                          NO 189                                  SEA STREET                              COLOMBO 11
+202502|6|172.0|SUDA JEWELLERY                          NO 189                                  SEA STREET                              COLOMBO 11

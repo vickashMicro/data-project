@@ -1,0 +1,256 @@
+/* Updated Color Variables */
+:root {
+  --primary-blue: #007bff;
+  --primary-blue-dark: #0069d9;
+  --primary-blue-light: #d1e7ff;
+  --primary-green: #28a745;
+  --primary-green-dark: #218838;
+  --primary-green-light: #d4edda;
+  --accent-orange: #fd7e14;
+  --text-dark: #343a40;
+  --text-light: #6c757d;
+  --bg-light: #f8f9fa;
+  --card-bg: #ffffff;
+  --border-color: #dee2e6;
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --transition: all 0.3s ease;
+}
+
+/* Base Layout */
+.volume-report-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--bg-light);
+  border-radius: 15px;
+  box-shadow: var(--shadow-sm);
+}
+
+.volume-report-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.volume-report-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.volume-report-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: var(--primary-blue);
+  border-radius: 3px;
+}
+
+/* Card Styling */
+.volume-report-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  border: 1px solid var(--border-color);
+}
+
+.volume-report-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+/* Form Elements */
+.volume-report-form-group {
+  margin-bottom: 2rem;
+}
+
+.volume-report-label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+.volume-report-select-wrapper {
+  position: relative;
+}
+
+.volume-report-select {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--text-dark);
+  background-color: var(--card-bg);
+  appearance: none;
+  transition: var(--transition);
+  cursor: pointer;
+  padding-right: 3rem;
+}
+
+.volume-report-select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+.volume-report-select-arrow {
+  position: absolute;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--text-light);
+}
+
+/* Button Styles */
+.volume-report-button-group {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.volume-report-pdf-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  flex: 1;
+  background: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.volume-report-pdf-button:hover {
+  background: var(--primary-blue-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 123, 255, 0.3);
+}
+
+.volume-report-pdf-button:active {
+  transform: translateY(0);
+}
+
+.volume-report-excel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  flex: 1;
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.volume-report-excel-button:hover {
+  background: var(--primary-green-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(40, 167, 69, 0.3);
+}
+
+.volume-report-excel-button:active {
+  transform: translateY(0);
+}
+
+.volume-report-icon {
+  font-size: 1.2rem;
+}
+
+/* Loading State */
+.volume-report-pdf-button.loading,
+.volume-report-excel-button.loading {
+  pointer-events: none;
+  color: transparent;
+}
+
+.volume-report-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: volume-report-spin 1s ease-in-out infinite;
+  position: absolute;
+}
+
+@keyframes volume-report-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Success State */
+.volume-report-pdf-button.success {
+  background: var(--accent-orange);
+  animation: volume-report-pulse 0.5s;
+}
+
+.volume-report-excel-button.success {
+  background: var(--accent-orange);
+  animation: volume-report-pulse 0.5s;
+}
+
+@keyframes volume-report-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Shake Animation */
+.volume-report-shake {
+  animation: volume-report-shake 0.4s;
+  border-color: #dc3545 !important;
+}
+
+@keyframes volume-report-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .volume-report-container {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .volume-report-card {
+    padding: 1.5rem;
+  }
+  
+  .volume-report-button-group {
+    flex-direction: column;
+  }
+  
+  .volume-report-title {
+    font-size: 1.75rem;
+  }
+}

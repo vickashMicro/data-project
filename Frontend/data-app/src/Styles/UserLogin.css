@@ -1,0 +1,281 @@
+/* Main Wrapper */
+.user-login-wrapper {
+  min-height: 100vh;
+  width: 100vw;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Styles */
+.user-login-header {
+  width: 100%;
+  background-color: #ffffff;
+  padding: 18px 5%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+.user-header-content {
+  display: flex;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  gap: 20px;
+}
+
+.user-header-logo {
+  height: 75px;
+  width: auto;
+  transition: transform 0.2s ease;
+}
+
+.user-header-logo:hover {
+  transform: scale(1.05);
+}
+
+.user-system-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #334155;
+  letter-spacing: -0.25px;
+  font-family: 'Inter', sans-serif;
+}
+
+.admin-login-switch-btn {
+  background: #60da70;
+  border: none;
+  color: #101110;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+}
+
+.admin-login-switch-btn:hover {
+  background: #e2e8f0;
+  color: #189e4b;
+}
+
+.admin-login-switch-btn::before {
+  content: "→";
+  font-weight: 600;
+}
+
+/* Login Form Container */
+.user-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  width: 100%;
+  padding: 20px;
+}
+
+.user-login-card {
+  width: 100%;
+  max-width: 440px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+  padding: 40px;
+  border: 1px solid #f1f5f9;
+}
+
+.user-login-intro {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.user-login-heading {
+  color: #0f172a;
+  font-size: 26px;
+  margin-bottom: 10px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  font-family: 'Inter', sans-serif;
+}
+
+.user-login-subheading {
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Form Elements */
+.user-login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-input-field {
+  margin-bottom: 18px;
+}
+
+.user-input-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #334155;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+}
+
+.user-text-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  background-color: #f8fafc;
+  font-family: 'Inter', sans-serif;
+}
+
+.user-text-input:focus {
+  border-color: #94a3b8;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
+  background-color: white;
+}
+
+.user-options-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.user-remember-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+}
+
+.user-remember-checkbox {
+  accent-color: #2c7a4f;
+  width: 16px;
+  height: 16px;
+}
+
+.user-forgot-password-link {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.user-forgot-password-link:hover {
+  color: #2c7a4f;
+  text-decoration: underline;
+}
+
+.user-login-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #2c7a4f;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 6px;
+  font-family: 'Inter', sans-serif;
+}
+
+.user-login-btn:hover {
+  background-color: #1a4d2e;
+  transform: translateY(-1px);
+}
+
+.user-login-btn:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .user-login-header {
+    padding: 16px 5%;
+  }
+  
+  .user-header-content {
+    gap: 16px;
+  }
+  
+  .user-header-logo {
+    height: 50px;
+  }
+  
+  .user-system-title {
+    font-size: 16px;
+  }
+  
+  .admin-login-switch-btn {
+    padding: 7px 14px;
+    font-size: 13px;
+  }
+  
+  .user-login-card {
+    padding: 32px 28px;
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-login-header {
+    padding: 14px 4%;
+  }
+  
+  .user-header-content {
+    gap: 12px;
+  }
+  
+  .user-header-logo {
+    height: 40px;
+  }
+  
+  .user-system-title {
+    font-size: 15px;
+  }
+  
+  .user-login-card {
+    padding: 28px 20px;
+    border-radius: 12px;
+  }
+  
+  .user-login-heading {
+    font-size: 22px;
+  }
+  
+  .user-options-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  
+  .user-login-btn {
+    padding: 12px;
+  }
+}

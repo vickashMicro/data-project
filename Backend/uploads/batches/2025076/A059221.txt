@@ -1,0 +1,8 @@
+Batch: 2025076
+Group: A059221
+
+Members:
+000001|MARIO S N|198801001625|
+
+Contributions:
+202502|6|1821.5774|KINDERNOTHILFE                          NO 15/4, VICTORIA PLACE                 ELVITIGALA ROAD                         COLOMBO 08

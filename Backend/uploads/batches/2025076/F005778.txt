@@ -1,0 +1,14 @@
+Batch: 2025076
+Group: F005778
+
+Members:
+000001|NISSANKA J K A A|810544139|
+000002|BAVAN C S|922314780|
+000003|KANDIAH A||1
+000004|SINNIAH A|542132736|
+000005|GNANADEVAN M|843523145|
+006003|KANDIAH A||
+
+Contributions:
+202502|6|32.0|AGRO OYA FARM                           AGRO OYA FARM                           AGRO OYA                                ROZELLA
+202503|6|32.0|AGRO OYA FARM                           AGRO OYA FARM                           AGRO OYA                                ROZELLA

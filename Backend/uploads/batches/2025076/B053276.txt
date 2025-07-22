@@ -1,0 +1,17 @@
+Batch: 2025076
+Group: B053276
+
+Members:
+000001|THUDUHENA T N S|197632100069|
+000002|KARUNARATHNA K S N||
+000003|ANJANA D L|200323511660|
+000004|DIMALSHA ANJANA|200323511660|
+000005|PAUL M M|200215003328|
+
+Contributions:
+202306|6|183.0|SIYOMARK TEC                            NO 721/26/2                             SHANTHALOKAGAMA                         ATHURUGIRIYA
+202307|6|183.0|SIYOMARK TEC                            NO 721/26/2                             SHANTHALOKAGAMA                         ATHURUGIRIYA
+202308|6|183.0|SIYOMARK TEC                            NO 721/26/2                             SHANTHALOKAGAMA                         ATHURUGIRIYA
+202309|6|183.0|SIYOMARK TEC                            NO 721/26/2                             SHANTHALOKAGAMA                         ATHURUGIRIYA
+202310|6|183.0|SIYOMARK TEC                            NO 721/26/2                             SHANTHALOKAGAMA                         ATHURUGIRIYA
+202311|6|183.0|SIYOMARK TEC                            NO 721/26/2                             SHANTHALOKAGAMA                         ATHURUGIRIYA

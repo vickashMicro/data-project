@@ -1,0 +1,10 @@
+Batch: 2025076
+Group: A056788
+
+Members:
+000001|MAFAZ M Z M|883111508|
+000002|MOHIDEEN MOHAMED A|197418100140|
+000003|ILIYAS S H M|703090982|
+
+Contributions:
+202501|6|132.0|NUMBER 1 LIGHTING                       NO 51/10                                SILVESMITH LANE                         COLOMBO 12

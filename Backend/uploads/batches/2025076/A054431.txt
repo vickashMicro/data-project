@@ -1,0 +1,9 @@
+Batch: 2025076
+Group: A054431
+
+Members:
+000001|RIMZAN M N M|720140950|1
+000002|HUSSAIN M T|199716303476|1
+
+Contributions:
+202502|6|40.0|IRON STORES                             NO. 16                                  HULFTSDROP STREET                       COLOMBO - 12

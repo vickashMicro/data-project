@@ -1,0 +1,10 @@
+Batch: 2025076
+Group: I027231
+
+Members:
+000001|KUMARA H I A|882394131|
+
+Contributions:
+202410|6|50.0|DASATHA TYRE SERVICE                    NO. 161/1                               RAGAMA ROAD                             KADAWATHA
+202411|6|50.0|DASATHA TYRE SERVICE                    NO. 161/1                               RAGAMA ROAD                             KADAWATHA
+202412|6|50.0|DASATHA TYRE SERVICE                    NO. 161/1                               RAGAMA ROAD                             KADAWATHA

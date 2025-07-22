@@ -1,0 +1,513 @@
+/* Reset and Base Styles */
+.formatone-body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.5;
+  padding: 0px;
+}
+
+/* FormatOne Component Styles */
+.formatone-container {
+  display: flex;
+  flex-direction: column;
+  height: 82vh;
+  padding: 10px;
+  background-color: #fff;
+  border: 3px solid #f39255;
+  border-radius: 5px;
+}
+
+.formatone-top-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1px;
+}
+
+.formatone-top-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 15px;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.formatone-top-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.formatone-info-container {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+
+.formatone-save-btn {
+  background-color: #2db05c;
+  color: white;
+}
+
+.formatone-delete-btn {
+  background-color: #b22c2c;
+  color: white;
+}
+
+.formatone-clear-btn {
+  background-color: #269dc4;
+  color: white;
+}
+
+.formatone-top-buttons button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.formatone-info-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+.formatone-total-rows-box {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 5px;
+  font-weight: 600;
+  width: fit-content;
+  user-select: none;
+}
+
+.formatone-total-contribution-box {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 5px;
+  font-weight: 600;
+  width: fit-content;
+  user-select: none;
+}
+
+.formatone-sheet-header {
+  background-color: #e6f2ff;
+  padding: 1px 2px;
+  font-weight: bold;
+  text-align: right;
+  border: 1px solid #999;
+  margin-bottom: 5px;
+  border-radius: 3px;
+}
+
+.formatone-filter-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background-color: #fffde7;
+  padding: 5px;
+  border: 1px solid #ddd;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.formatone-filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.formatone-filter-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.formatone-filter-group select,
+.formatone-filter-group input {
+  padding: 6px 8px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.formatone-search-input {
+  display: flex;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.formatone-search-btn {
+  padding: 6px 10px;
+  background-color: #3fa6aa;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 32px;
+}
+
+.formatone-table-scroll-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.formatone-data-table-container {
+  flex: 1;
+  overflow: auto;
+  border: 2px solid #e28143;
+  border-radius: 4px;
+  background-color: white;
+  position: relative;
+}
+
+.formatone-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.formatone-data-table th,
+.formatone-data-table td {
+  border: 0.5px solid #ddd;
+  padding: 2px 1px;
+  text-align: center;
+  vertical-align: middle;
+  word-wrap: break-word;
+}
+
+.formatone-data-table th {
+  background-color: #f2f2f2;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  font-weight: bold;
+}
+
+.formatone-data-table input[type="text"] {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.formatone-data-table input[type="text"]:focus {
+  outline: none;
+  border-color: #f39255;
+  box-shadow: 0 0 3px rgba(243, 146, 85, 0.5);
+}
+
+.formatone-action-buttons {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+.formatone-row-action-btn {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.formatone-add-btn {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.formatone-delete-btn {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.formatone-row-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.formatone-data-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.formatone-data-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.formatone-data-table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.formatone-data-table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Main Container */
+.formatone-container {
+  display: flex;
+  flex-direction: column;
+  height: 82vh;
+  padding: 10px;
+  background-color: #fff;
+  border: 3px solid #f39255;
+  border-radius: 5px;
+}
+
+/* Top Buttons */
+.formatone-top-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.formatone-top-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 15px;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.formatone-save-btn {
+  background-color: #2db05c;
+  color: white;
+}
+
+.formatone-delete-btn {
+  background-color: #b22c2c;
+  color: white;
+}
+
+.formatone-clear-btn {
+  background-color: #269dc4;
+  color: white;
+}
+
+.formatone-top-buttons button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Sheet Header */
+.formatone-sheet-header {
+  background-color: #e6f2ff;
+  padding: 1px 2px;
+  font-weight: bold;
+  text-align: right;
+  border: 1px solid #999;
+  margin-bottom: 15px;
+  border-radius: 3px;
+}
+
+/* Filter Section */
+.formatone-filter-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background-color: #fffde7;
+  padding: 5px;
+  border: 1px solid #ddd;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.formatone-filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.formatone-filter-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.formatone-filter-group select,
+.formatone-filter-group input {
+  padding: 6px 8px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.formatone-search-input {
+  display: flex;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.formatone-search-btn {
+  padding: 6px 10px;
+  background-color: #3fa6aa;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 32px;
+}
+
+/* Info Boxes Container */
+.formatone-info-container {
+  display: flex;
+  justify-content: flex-end; /* Align to the right */
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+/* Info Boxes */
+.formatone-total-rows-box {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 5px;
+  font-weight: 600;
+  width: fit-content;
+  user-select: none;
+}
+
+.formatone-total-contribution-box {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 5px;
+  font-weight: 600;
+  width: fit-content;
+  user-select: none;
+}
+
+/* Scrollable Table Container */
+.formatone-table-scroll-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Table Content */
+.formatone-data-table-container {
+  flex: 1;
+  overflow: auto;
+  border: 2px solid #e28143;
+  border-radius: 4px;
+  background-color: white;
+  position: relative;
+}
+
+/* Data Table */
+.formatone-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.formatone-data-table th,
+.formatone-data-table td {
+  border: 0.5px solid #ddd;
+  padding: 2px 1px;
+  text-align: center;
+  vertical-align: middle;
+  word-wrap: break-word;
+}
+
+.formatone-data-table th {
+  background-color: #f2f2f2;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  font-weight: bold;
+}
+
+.formatone-data-table input[type="text"] {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.formatone-data-table input[type="text"]:focus {
+  outline: none;
+  border-color: #f39255;
+  box-shadow: 0 0 3px rgba(243, 146, 85, 0.5);
+}
+
+/* Action Buttons */
+.formatone-action-buttons {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.formatone-row-action-btn {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.formatone-add-btn {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.formatone-delete-btn {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.formatone-row-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Scrollbar Styling */
+.formatone-data-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.formatone-data-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.formatone-data-table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.formatone-data-table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

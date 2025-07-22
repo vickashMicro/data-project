@@ -1,0 +1,11 @@
+Batch: 2025076
+Group: A058725
+
+Members:
+000001|FIRDOUSE M A M|791031338|
+000002|NIYAZ F M|198134700845|
+000003|SWARAMALI K U|198577800680|
+
+Contributions:
+202501|6|260.0|NORDSON (PVT) LTD                       NO 02                                   CHARLES PLACE                           COLOMBO 03
+202502|6|260.0|NORDSON (PVT) LTD                       NO 02                                   CHARLES PLACE                           COLOMBO 03

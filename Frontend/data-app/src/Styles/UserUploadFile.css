@@ -1,0 +1,109 @@
+/* === Full Page Layout === */
+.user-upload-page {
+  width: 250%;
+  height: 100%;
+  min-height: 100vh;
+  background-color: var(--background);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-dark);
+}
+
+/* === Title === */
+.user-upload-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* === Table Container === */
+.user-upload-table {
+  width: 100%;
+  max-width: 1000px;
+  border-collapse: collapse;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.user-upload-table th,
+.user-upload-table td {
+  padding: 1rem 1.2rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.user-upload-table th {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.user-upload-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.user-upload-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.user-upload-table td a {
+  color: var(--accent);
+  text-decoration: underline;
+  transition: var(--transition);
+}
+
+.user-upload-table td a:hover {
+  opacity: 0.8;
+}
+
+/* === Fallback Message === */
+.user-upload-page p {
+  font-size: 1rem;
+  margin-top: 1rem;
+  color: var(--text-dark);
+  opacity: 0.8;
+}
+
+/* === Main Content Styling === */
+.user-upload-main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: var(--background);
+  padding: 2rem;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* === Back Button === */
+.user-upload-back-button {
+  margin-top: 20px;
+  padding: 8px 16px;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .user-upload-page {
+    padding: 1rem;
+  }
+
+  .user-upload-title {
+    font-size: 1.5rem;
+  }
+
+  .user-upload-table th,
+  .user-upload-table td {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+}

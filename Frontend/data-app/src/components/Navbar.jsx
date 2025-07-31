@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSignOutAlt, FaHome, FaDatabase, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaSignOutAlt, FaHome, FaDatabase, FaChevronDown, FaChevronUp, FaCloudUploadAlt } from 'react-icons/fa'; // ✅ Added FaCloudUploadAlt icon
 import { motion, AnimatePresence } from 'framer-motion';
 import '../styles/UserHome.css';
 
@@ -12,15 +12,13 @@ const Navbar = ({ activeTab, setActiveTab }) => {
 
   const userName = localStorage.getItem("userName");
 
-  // Simulate network status changes
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsOnline(Math.random() > 0.1); // Randomly toggle online/offline
+      setIsOnline(Math.random() > 0.1);
     }, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -31,7 +29,6 @@ const Navbar = ({ activeTab, setActiveTab }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ✅ Handle Logout
   const handleLogout = () => {
     localStorage.removeItem("userToken");
     localStorage.removeItem("userName");
@@ -91,9 +88,17 @@ const Navbar = ({ activeTab, setActiveTab }) => {
             )}
           </AnimatePresence>
         </div>
+
+        {/* ✅ NEW Upload Files Button */}
+        <button
+          className="user-home-nav-button"
+          onClick={() => navigate('/user-upload-file')}
+        >
+          <FaCloudUploadAlt className="nav-icon" />
+          <b>Upload Files</b>
+        </button>
       </div>
 
-      
       <div className="user-home-navbar-right">
         <div className="user-info-wrapper">
           <span className="user-name-display">👤 {userName}</span>
@@ -106,7 +111,6 @@ const Navbar = ({ activeTab, setActiveTab }) => {
           <FaSignOutAlt />
         </button>
       </div>
-
     </header>
   );
 };

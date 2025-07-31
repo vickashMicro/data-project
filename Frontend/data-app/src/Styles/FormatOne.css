@@ -350,10 +350,11 @@
 
 .formatone-filter-group select,
 .formatone-filter-group input {
-  padding: 6px 8px;
+  padding: 6px 18px;
   border: 1px solid #aaa;
   border-radius: 4px;
   font-size: 0.9rem;
+  gap: 4px;
 }
 
 .formatone-search-input {
@@ -510,4 +511,134 @@
 
 .formatone-data-table-container::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+/* Animated Success Modal Styles */
+/* FormatTwo.css */
+
+.success-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 0;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.success-modal-content {
+  background: linear-gradient(135deg, #f8f9fa, #ffffff);
+  padding: 30px 40px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  transform: translateY(-50px);
+  animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.success-modal-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #2e7d32, #4caf50, #81c784);
+  animation: progressBar 2.5s ease-in-out;
+}
+
+.success-message h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #2e7d32;
+  font-size: 28px;
+  font-weight: 600;
+  transform: scale(0.9);
+  opacity: 0;
+  animation: scaleIn 0.3s ease-out 0.3s forwards;
+}
+
+.success-message p {
+  margin-bottom: 25px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #555;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.4s ease-out 0.4s forwards;
+}
+
+.success-icon {
+  font-size: 60px;
+  color: #4caf50;
+  margin-bottom: 20px;
+  animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s forwards;
+}
+
+.modal-close-btn {
+  background: linear-gradient(to right, #2e7d32, #4caf50);
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px rgba(46, 125, 50, 0.2);
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.4s ease-out 0.5s forwards;
+}
+
+.modal-close-btn:hover {
+  background: linear-gradient(to right, #1b5e20, #2e7d32);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(46, 125, 50, 0.3);
+}
+
+.modal-close-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.1); opacity: 1; }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes progressBar {
+  0% { width: 0%; }
+  100% { width: 100%; }
 }

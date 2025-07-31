@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import { FiDownload, FiAlertCircle, FiChevronDown, FiCheck } from 'react-icons/fi';
 import '../styles/FormatOneDownload.css';
+import { useNavigate } from 'react-router-dom';
 
 const FormatOneDownload = () => {
   const [selectedSheet, setSelectedSheet] = useState('');
@@ -13,6 +14,7 @@ const FormatOneDownload = () => {
   const [sheetNames, setSheetNames] = useState([]);
   const [rowCounts, setRowCounts] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,8 +114,7 @@ const FormatOneDownload = () => {
       setTimeout(() => setShouldShake(false), 500);
       return;
     }
-    alert(`Checking for formatting errors in ${selectedSheet}...`);
-    // You can implement actual error checking logic here
+    navigate(`/errors?sheetName=${selectedSheet}`);
   };
 
   return (

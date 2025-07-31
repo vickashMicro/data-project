@@ -7,13 +7,14 @@ import CreateUser from './components/CreateUser';
 import UploadFile from './components/UploadFile';
 import CreateSheet from './components/CreateSheet';
 import DeleteSheet from './components/DeleteSheet';
+import DeleteData from './components/DeleteData'; // New import
 import UserDetails from './components/UserDetails';
 import FormatOneDownload from './components/FormatOneDownload';
 import FormatTwoDownload from './components/FormatTwoDownload';
 import UserWiseDataDetail from './components/UserWiseDataDetail';
 import Error from './components/Error';
 import VolumeReport from './components/VolumeReport';
-import MismatchReport from './components/MismatchReport'; // NEW IMPORT ADDED
+import MismatchReport from './components/MismatchReport';
 
 // User Components
 import UserLogin from './components/UserLogin';
@@ -22,6 +23,7 @@ import FormatOne from './components/FormatOne';
 import FormatTwo from './components/FormatTwo';
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
+import UserUploadFile from "./components/UserUploadFile";
 
 function App() {
   return (
@@ -34,12 +36,13 @@ function App() {
         <Route path="/upload-file" element={<UploadFile />} />
         <Route path="/create-sheet" element={<CreateSheet />} />
         <Route path="/delete-sheet" element={<DeleteSheet />} />
+        <Route path="/delete-data" element={<DeleteData />} /> {/* New route */}
         <Route path="/user-details" element={<UserDetails />} />
         <Route path="/format-one-download" element={<FormatOneDownload />} />
         <Route path="/format-two-download" element={<FormatTwoDownload />} />
         <Route path="/user-wise-report" element={<UserWiseDataDetail />} />
         <Route path="/volume-report" element={<VolumeReport />} />
-        <Route path="/mismatch-report" element={<MismatchReport />} /> {/* NEW ROUTE ADDED */}
+        <Route path="/mismatch-report" element={<MismatchReport />} />
         <Route path="/errors" element={<Error />} />
 
         {/* User Routes */}
@@ -49,6 +52,7 @@ function App() {
         <Route path="/home-format2" element={<FormatTwo />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/user-upload-file" element={<UserUploadFile />} />
         <Route path="*" element={<UserLogin />} />
       </Routes>
     </Router>

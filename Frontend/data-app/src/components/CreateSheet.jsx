@@ -11,7 +11,7 @@ const CreateSheet = () => {
   const progressIntervalRef = useRef(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-
+  const [isCreating, setIsCreating] = useState(false);
   useEffect(() => {
     const fetchUploadedFiles = async () => {
       try {
@@ -45,6 +45,7 @@ const CreateSheet = () => {
     setTimeout(() => setProgress(0), 2000);
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!sheetName || !empMemberFile || !empContributionFile) {
@@ -58,10 +59,13 @@ const CreateSheet = () => {
     }
 
     try {
+      setIsCreating(true);
+
       const checkRes = await fetch(`http://localhost:5000/check-sheet-exists?sheetName=${sheetName}`);
       const checkData = await checkRes.json();
       if (checkData.success && checkData.exists) {
         alert(`Sheet \"${sheetName}\" already exists. Please use a different name.`);
+        setIsCreating(false);
         return;
       }
 
@@ -80,6 +84,7 @@ const CreateSheet = () => {
 
       const result = await res.json();
       completeProgress();
+      setIsCreating(false);
 
       if (result.success) {
         setSuccessMessage(`Sheet \"${sheetName}\" was successfully created with ${result.message}`);
@@ -92,6 +97,7 @@ const CreateSheet = () => {
       }
     } catch (error) {
       completeProgress();
+      setIsCreating(false);
       alert("Server error while creating sheet.");
       console.error(error);
     }
@@ -149,7 +155,10 @@ const CreateSheet = () => {
               </select>
             </label>
 
-            <button type="submit">Create</button>
+         
+            <button type="submit" disabled={isCreating}>
+              {isCreating ? 'Creating...' : 'Create'}
+            </button>
           </form>
 
           {progress > 0 && (

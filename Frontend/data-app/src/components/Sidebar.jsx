@@ -11,7 +11,7 @@ import {
   FaSignOutAlt,
   FaFileAlt,
   FaTrashAlt,
-  FaBalanceScale // New icon for Mismatch Report
+  FaBalanceScale
 } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -28,7 +28,8 @@ const Sidebar = () => {
       '/create-user', 
       '/upload-file', 
       '/create-sheet',
-      '/delete-sheet'
+      '/delete-sheet',
+      '/delete-data'
     ];
     const reportsPaths = [
       '/user-details', 
@@ -37,7 +38,7 @@ const Sidebar = () => {
       '/user-wise-report', 
       '/errors',
       '/volume-report',
-      '/mismatch-report' // Added mismatch-report path
+      '/mismatch-report'
     ];
     
     if (systemMasterPaths.includes(location.pathname)) {
@@ -123,6 +124,13 @@ const Sidebar = () => {
             >
               <FaTrashAlt className="item-icon" />
               <span>Delete Sheet</span>
+            </button>
+            <button 
+              className={`dropdown-item ${isActive('/delete-data') ? 'active' : ''}`}
+              onClick={() => navigate('/delete-data')}
+            >
+              <FaTrashAlt className="item-icon" />
+              <span>Delete Data</span>
             </button>
           </div>
         </div>

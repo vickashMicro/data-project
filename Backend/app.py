@@ -11,6 +11,7 @@ from io import BytesIO
 from fpdf import FPDF
 from openpyxl.styles import Font, Alignment, PatternFill
 from dotenv import load_dotenv
+from concurrent.futures import ThreadPoolExecutor
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
@@ -332,6 +333,7 @@ def parse_id_number(line):
     return ''
 
 # === Process Contribution File ===
+# === Process Contribution File ===
 def process_contribution_file(file_path):
     contributions = []
     try:
@@ -347,7 +349,7 @@ def process_contribution_file(file_path):
                     'emp_number': line[8:14].strip(),
                     'cont_period': line[14:20].strip(),
                     'bank_code': line[21:22].strip() if len(line) > 21 else '',
-                    'contribution': parse_contribution_amount(line[23:35].strip()),
+                    'contribution': line[23:35].strip(),  # Keep exactly as is
                     'company_name': line[35:190].strip() if len(line) > 35 else ''
                 }
                 if record['zone_code'] and record['emp_number']:
@@ -360,38 +362,64 @@ def process_contribution_file(file_path):
     return contributions
 
 # === Process Member File ===
+# === Process Member File ===
 def process_member_file(file_path):
     members = []
     try:
-        lines = safe_read_lines(file_path)
-        if not lines:
-            return []
-        # Skip header line (000000000000)
-        lines = lines[1:] if len(lines[0].strip()) == 12 else lines
-
-        for line in lines:
-            line = line.rstrip('\n')
-            if len(line) < 13:
-                continue
-            try:
-                record = {
-                    'zone_code': line[0:1].strip(),
-                    'emp_number': line[1:7].strip(),
-                    'member_number': line[7:13].strip(),
-                    'name': line[13:72].strip(),
-                    'id_number': parse_id_number(line),
-                    'id_status': line[85:86].strip() if len(line) > 85 else '',
-                    'mem_status': line[86:87].strip() if len(line) > 86 else ''
-                }
-                if record['zone_code'] and record['emp_number']:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            # Skip header line if it exists
+            first_line = f.readline()
+            if len(first_line.strip()) == 12:
+                pass  # We've already read the header
+            else:
+                # Process first line if it's not a header
+                record = process_member_line(first_line)
+                if record:
                     members.append(record)
-            except Exception as e:
-                app.logger.warning(f"Skipping malformed member line: {line}\nError: {str(e)}")
-    except Exception as e:
-        app.logger.error(f"Error processing member file: {str(e)}")
-        raise
+            
+            # Process remaining lines
+            for line in f:
+                record = process_member_line(line)
+                if record:
+                    members.append(record)
+    except UnicodeDecodeError:
+        with open(file_path, 'r', encoding='latin-1') as f:
+            # Similar processing for latin-1 encoding
+            first_line = f.readline()
+            if len(first_line.strip()) != 12:
+                record = process_member_line(first_line)
+                if record:
+                    members.append(record)
+            
+            for line in f:
+                record = process_member_line(line)
+                if record:
+                    members.append(record)
     return members
 
+def process_member_line(line):
+    line = line.rstrip('\n')
+    if len(line) < 13:
+        return None
+    
+    try:
+        record = {
+            'zone_code': line[0:1].strip(),
+            'emp_number': line[1:7].strip(),
+            'member_number': line[7:13].strip(),
+            'name': line[13:72].strip(),
+            'id_number': parse_id_number(line),
+            'id_status': line[85:86].strip() if len(line) > 85 else '',
+            'mem_status': line[86:87].strip() if len(line) > 86 else ''
+        }
+        if record['zone_code'] and record['emp_number']:
+            return record
+    except Exception as e:
+        app.logger.warning(f"Skipping malformed member line: {line}\nError: {str(e)}")
+    return None
+
+# === Save to Dynamic Table ===
+# === Save to Dynamic Table ===
 # === Save to Dynamic Table ===
 def save_to_dynamic_table(table_name, records):
     db = get_db()
@@ -405,7 +433,7 @@ def save_to_dynamic_table(table_name, records):
                 emp_number VARCHAR(10),
                 cont_period VARCHAR(10),
                 bank_code VARCHAR(5),
-                contribution FLOAT,
+                contribution VARCHAR(20),  # Changed from FLOAT to VARCHAR
                 company_name TEXT,
                 member_number VARCHAR(20),
                 name VARCHAR(100),
@@ -417,27 +445,41 @@ def save_to_dynamic_table(table_name, records):
 
         cursor.execute(f"DELETE FROM `{table_name}`")
 
-        for record in records:
-            cursor.execute(f"""
+        # Batch insert records (1000 at a time)
+        batch_size = 1000
+        for i in range(0, len(records), batch_size):
+            batch = records[i:i + batch_size]
+            values = []
+            for record in batch:
+                values.append((
+                    record.get("batch_number", ""), 
+                    record.get("zone_code", ""), 
+                    record.get("emp_number", ""),
+                    record.get("cont_period", ""), 
+                    record.get("bank_code", ""), 
+                    record.get("contribution", ""),  # No float conversion
+                    record.get("company_name", ""), 
+                    record.get("member_number", ""), 
+                    record.get("name", ""),
+                    record.get("id_number", ""), 
+                    record.get("id_status", ""), 
+                    record.get("mem_status", "")
+                ))
+            
+            cursor.executemany(f"""
                 INSERT INTO `{table_name}` (
                     batch_number, zone_code, emp_number, cont_period, bank_code,
                     contribution, company_name, member_number, name, id_number, id_status, mem_status
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                record.get("batch_number", ""), record.get("zone_code", ""), record.get("emp_number", ""),
-                record.get("cont_period", ""), record.get("bank_code", ""), record.get("contribution", 0.0),
-                record.get("company_name", ""), record.get("member_number", ""), record.get("name", ""),
-                record.get("id_number", ""), record.get("id_status", ""), record.get("mem_status", "")
-            ))
+            """, values)
+            db.commit()
 
-        db.commit()
     except Exception as e:
         db.rollback()
         raise e
     finally:
         cursor.close()
-        db.close()
-
+        db.close()        
 # === Metadata table ===
 def create_metadata_table():
     db = get_db()
@@ -479,6 +521,7 @@ def insert_sheet_table_metadata(sheet_name, zone_code, emp_number, dynamic_table
         db.close()
 
 # === Create Merged Sheet ===
+# === Create Merged Sheet ===
 @app.route('/create-merged-sheet', methods=['POST'])
 def create_merged_sheet():
     data = request.get_json()
@@ -496,20 +539,26 @@ def create_merged_sheet():
         return jsonify({"success": False, "message": "One or more files not found"}), 400
 
     try:
-        contributions = process_contribution_file(contrib_path)
-        members = process_member_file(member_path)
+        # Process files in parallel
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            contrib_future = executor.submit(process_contribution_file, contrib_path)
+            member_future = executor.submit(process_member_file, member_path)
+            contributions = contrib_future.result()
+            members = member_future.result()
 
         if not contributions or not members:
             return jsonify({"success": False, "message": "Empty or invalid file data"}), 400
 
         grouped_data = {}
 
+        # Group members first
         for member in members:
             key = f"{member['zone_code']}{member['emp_number']}"
             if key not in grouped_data:
                 grouped_data[key] = {"members": [], "contrib": None}
             grouped_data[key]["members"].append(member)
 
+        # Then add contributions
         for contrib in contributions:
             key = f"{contrib['zone_code']}{contrib['emp_number']}"
             if key not in grouped_data:
@@ -517,50 +566,45 @@ def create_merged_sheet():
             else:
                 grouped_data[key]["contrib"] = contrib
 
-        for key, group in grouped_data.items():
-            contrib = group.get("contrib")
-            if not contrib:
-                continue
+        # Process groups in parallel
+        with ThreadPoolExecutor() as executor:
+            futures = []
+            for key, group in grouped_data.items():
+                contrib = group.get("contrib")
+                if not contrib:
+                    continue
 
-            full_records = []
-            for member in group["members"]:
-                merged = {**contrib, **member}
-                full_records.append(merged)
+                full_records = []
+                for member in group["members"]:
+                    merged = {**contrib, **member}
+                    full_records.append(merged)
 
-            zone_code = contrib['zone_code']
-            emp_number = contrib['emp_number']
-            batch_number = contrib.get('batch_number', '')
-            company_name = contrib.get('company_name', '')
-            dynamic_table_name = f"{sheet_name}{zone_code}{emp_number}"
+                zone_code = contrib['zone_code']
+                emp_number = contrib['emp_number']
+                batch_number = contrib.get('batch_number', '')
+                company_name = contrib.get('company_name', '')
+                dynamic_table_name = f"{sheet_name}{zone_code}{emp_number}"
 
-            save_to_dynamic_table(dynamic_table_name, full_records)
-            insert_sheet_table_metadata(sheet_name, zone_code, emp_number, dynamic_table_name, batch_number, company_name)
+                futures.append(executor.submit(
+                    save_to_dynamic_table, 
+                    dynamic_table_name, 
+                    full_records
+                ))
+                futures.append(executor.submit(
+                    insert_sheet_table_metadata,
+                    sheet_name, zone_code, emp_number, 
+                    dynamic_table_name, batch_number, company_name
+                ))
+
+            # Wait for all operations to complete
+            for future in futures:
+                future.result()
 
         return jsonify({"success": True, "message": f"{len(grouped_data)} employers processed."})
 
     except Exception as e:
         app.logger.error(traceback.format_exc())
         return jsonify({"success": False, "message": str(e)}), 500
-
-# === Get Employer Groups ===
-@app.route('/get-employer-groups', methods=['GET'])
-def get_employer_groups():
-    sheet_name = request.args.get('sheetName')
-    if not sheet_name:
-        return jsonify({"success": False, "message": "Missing sheetName"}), 400
-
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT zone_code, emp_number, dynamic_table_name, batch_number, company_name
-        FROM sheet_tables WHERE sheet_name=%s
-    """, (sheet_name,))
-    groups = cursor.fetchall()
-    cursor.close()
-    db.close()
-
-    return jsonify({"success": True, "data": groups})
-
 # === Get Members By Group ===
 @app.route('/get-members-by-group', methods=['GET'])
 def get_members_by_group():
@@ -617,26 +661,78 @@ def get_sheets():
 @app.route('/get-group-labels', methods=['GET'])
 def get_group_labels():
     sheet_name = request.args.get('sheetName')
-    if not sheet_name:
-        return jsonify({"success": False, "message": "Missing sheetName"}), 400
+    batch_number = request.args.get('batchNumber')
+    
+    if not sheet_name and not batch_number:
+        return jsonify({"success": False, "message": "Missing sheetName or batchNumber"}), 400
 
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute("""
-        SELECT zone_code, emp_number 
-        FROM sheet_tables 
-        WHERE sheet_name = %s
-    """, (sheet_name,))
-    results = cursor.fetchall()
-    cursor.close()
-    db.close()
-
-    labels = [f"{row[0]}{row[1]}" for row in results]
-    return jsonify({"success": True, "data": labels})
-
-
-# === Get Members by Label (ZoneCode+EmpNumber) ===
-# === Get Members by Label (ZoneCode+EmpNumber) ===
+    db = None
+    cursor = None
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        
+        if sheet_name:
+            # Get labels with counts from both sheet_tables and Cfile table
+            query = """
+                SELECT 
+                    st.zone_code,
+                    st.emp_number,
+                    (SELECT COUNT(*) 
+                     FROM `{sheet_name}Cfile` c 
+                     WHERE c.zone_code = st.zone_code 
+                     AND c.emp_number = st.emp_number) as record_count,
+                    CONCAT(st.zone_code, st.emp_number) as label
+                FROM sheet_tables st
+                WHERE st.sheet_name = %s
+                ORDER BY st.zone_code, st.emp_number
+            """.format(sheet_name=sheet_name)
+            cursor.execute(query, (sheet_name,))
+        else:
+            # For batch number search
+            query = """
+                SELECT 
+                    st.zone_code,
+                    st.emp_number,
+                    (SELECT COUNT(*) 
+                     FROM `{batch_number}Cfile` c 
+                     WHERE c.zone_code = st.zone_code 
+                     AND c.emp_number = st.emp_number) as record_count,
+                    CONCAT(st.zone_code, st.emp_number) as label
+                FROM sheet_tables st
+                WHERE st.batch_number = %s
+                ORDER BY st.zone_code, st.emp_number
+            """.format(batch_number=batch_number)
+            cursor.execute(query, (batch_number,))
+            
+        results = cursor.fetchall()
+        
+        # Format the labels with counts
+        labels = []
+        for row in results:
+            label = f"{row['zone_code']}{row['emp_number']}"
+            count = row['record_count'] or 0
+            labels.append({
+                'label': label,
+                'display': f"{label} ({count})",
+                'count': count
+            })
+        
+        return jsonify({
+            "success": True, 
+            "data": labels
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False, 
+            "message": f"Error getting group labels: {str(e)}"
+        }), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if db:
+            db.close()
 @app.route('/get-members-by-label', methods=['GET'])
 @app.route('/get-members-by-label', methods=['GET'])
 def get_members_by_label():
@@ -711,25 +807,7 @@ def create_mismatch_table():
 
 create_mismatch_table()
 
-@app.route('/get-mismatches', methods=['GET'])
-def get_mismatches():
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-    
-    try:
-        cursor.execute("""
-            SELECT * FROM batchnumber_mismatch 
-            WHERE resolved = FALSE
-            ORDER BY mismatch_date DESC
-        """)
-        mismatches = cursor.fetchall()
-        return jsonify({"success": True, "data": mismatches})
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-    finally:
-        cursor.close()
-        db.close()
-        
+
 # === Delete Sheet ===
 @app.route('/delete-sheet', methods=['DELETE'])
 def delete_sheet():
@@ -785,6 +863,7 @@ def save_format_one():
         sheet_name = data['sheetName']
         rows = data['rows']
         user_code = data['userCode']
+        frontend_total = data.get('frontendTotal', "0")
 
         if not isinstance(rows, list):
             return jsonify(success=False, message="Rows should be an array"), 400
@@ -799,48 +878,12 @@ def save_format_one():
                         message=f"Row {i+1} missing required field: {field}"
                     ), 400
 
-        # Calculate frontend total
-        frontend_total = sum(float(row.get('contribution', 0)) for row in rows)
-        
-        # Get the first row's batch number, zone code and emp number for comparison
-        first_row = rows[0]
-        batch_number = first_row['batchNumber']
-        zone_code = first_row['zoneCode']
-        emp_number = first_row['empNumber']
-        
-        # Get the dynamic table name for this group
-        dynamic_table_name = f"{sheet_name}{zone_code}{emp_number}"
-        
-        # Calculate backend total from the dynamic table (single row's contribution)
-        backend_total = 0
-        try:
-            db = get_db()
-            cur = db.cursor(dictionary=True)
-            
-            # Check if dynamic table exists
-            cur.execute("SHOW TABLES LIKE %s", (dynamic_table_name,))
-            if cur.fetchone():
-                # Get the specific row's contribution from dynamic table
-                cur.execute(f"""
-                    SELECT contribution 
-                    FROM `{dynamic_table_name}`
-                    WHERE batch_number = %s 
-                    AND zone_code = %s 
-                    AND emp_number = %s
-                    LIMIT 1
-                """, (batch_number, zone_code, emp_number))
-                result = cur.fetchone()
-                if result:
-                    backend_total = float(result['contribution']) if result['contribution'] else 0
-        except Exception as e:
-            app.logger.error(f"Error calculating backend total: {str(e)}")
-        
-        # Compare totals (ignoring decimals)
-        mismatch_detected = int(frontend_total) != int(backend_total)
-        
         table_name = f"{sheet_name}Cfile"
-        
+        db = get_db()
+        cur = db.cursor(dictionary=True)
+
         # Create table if not exists with proper schema
+        # Updated unique key to include cont_period instead of member_number
         cur.execute(f"""
         CREATE TABLE IF NOT EXISTS `{table_name}` (
           id INT AUTO_INCREMENT PRIMARY KEY,
@@ -863,7 +906,7 @@ def save_format_one():
         mismatches = 0
 
         for row in rows:
-            # Format data according to requirements
+            # Format data
             batch_number = str(row.get('batchNumber', '')).strip().zfill(7)
             zone_code = str(row.get('zoneCode', '')).strip().upper()
             emp_number = str(row.get('empNumber', '')).strip().zfill(6)
@@ -871,51 +914,41 @@ def save_format_one():
             member_number = str(row.get('membersNumber', '')).strip().zfill(6)
             page_no = str(row.get('pageNo', '0')).strip().zfill(4)
             contribution = str(row.get('contribution', '0')).strip().zfill(11)
-            
-            # Check if record exists with the composite key
+
+            # Check if this member exists for this batch/zone/emp/cont_period combination
             cur.execute(f"""
-            SELECT 
-                page_no as existing_page_no,
-                contribution as existing_contribution
-            FROM `{table_name}` 
+            SELECT 1 FROM `{table_name}` 
             WHERE 
                 batch_number=%s AND 
                 zone_code=%s AND 
                 emp_number=%s AND 
-                cont_period=%s AND 
+                cont_period=%s AND
                 member_number=%s
             """, (batch_number, zone_code, emp_number, cont_period, member_number))
             
-            existing_record = cur.fetchone()
-            
-            if existing_record:
-                # Check if any data needs updating
-                needs_update = (
-                    existing_record['existing_page_no'] != page_no or
-                    existing_record['existing_contribution'] != contribution
-                )
-                
-                if needs_update:
-                    # Update existing record
-                    cur.execute(f"""
-                    UPDATE `{table_name}` SET 
-                        page_no=%s,
-                        contribution=%s,
-                        modified_by=%s,
-                        modified_at=%s
-                    WHERE 
-                        batch_number=%s AND 
-                        zone_code=%s AND 
-                        emp_number=%s AND 
-                        cont_period=%s AND 
-                        member_number=%s
-                    """, (
-                        page_no, contribution, user_code, now,
-                        batch_number, zone_code, emp_number, cont_period, member_number
-                    ))
-                    updated += 1
+            exists = cur.fetchone() is not None
+
+            if exists:
+                # Update existing record for this member in this period
+                cur.execute(f"""
+                UPDATE `{table_name}` SET 
+                    page_no=%s,
+                    contribution=%s,
+                    modified_by=%s,
+                    modified_at=%s
+                WHERE 
+                    batch_number=%s AND 
+                    zone_code=%s AND 
+                    emp_number=%s AND 
+                    cont_period=%s AND
+                    member_number=%s
+                """, (
+                    page_no, contribution, user_code, now,
+                    batch_number, zone_code, emp_number, cont_period, member_number
+                ))
+                updated += 1
             else:
-                # Insert new record
+                # Insert new record for this member in this period
                 cur.execute(f"""
                 INSERT INTO `{table_name}` (
                     batch_number, zone_code, emp_number, cont_period,
@@ -929,44 +962,58 @@ def save_format_one():
                 ))
                 inserted += 1
 
-        # Create mismatch table if totals don't match
+        # Rest of the code remains the same...
+        dynamic_table_name = f"{sheet_name}{zone_code}{emp_number}"
+        backend_total = "00000000000"
+        
+        try:
+            cur.execute("SHOW TABLES LIKE %s", (dynamic_table_name,))
+            if cur.fetchone():
+                cur.execute(f"""
+                    SELECT contribution 
+                    FROM `{dynamic_table_name}`
+                    WHERE batch_number = %s 
+                    AND zone_code = %s 
+                    AND emp_number = %s
+                    LIMIT 1
+                """, (batch_number, zone_code, emp_number))
+                result = cur.fetchone()
+                if result and result['contribution']:
+                    backend_total = result['contribution'].strip()
+        except Exception as e:
+            app.logger.error(f"Error getting backend total: {str(e)}")
+        
+        mismatch_detected = frontend_total.zfill(11) != backend_total.zfill(11)
+        
         if mismatch_detected:
             mismatch_table_name = f"{batch_number}_mismatches"
-            
             try:
-                # Create mismatch table if not exists
                 cur.execute(f"""
                 CREATE TABLE IF NOT EXISTS `{mismatch_table_name}` (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     batch_number VARCHAR(7) NOT NULL,
                     zone_code VARCHAR(1) NOT NULL,
                     emp_number VARCHAR(6) NOT NULL,
-                    frontend_total DECIMAL(15,2) NOT NULL,
-                    backend_total DECIMAL(15,2) NOT NULL,
-                    difference DECIMAL(15,2) NOT NULL,
+                    frontend_total VARCHAR(20) NOT NULL,
+                    backend_total VARCHAR(20) NOT NULL,
                     user_code VARCHAR(50) NOT NULL,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     UNIQUE KEY unique_mismatch (batch_number, zone_code, emp_number)
-                )
-                """)
+                )""")
                 
-                # Insert mismatch record
-                difference = frontend_total - backend_total
                 cur.execute(f"""
                 INSERT INTO `{mismatch_table_name}` (
                     batch_number, zone_code, emp_number,
-                    frontend_total, backend_total, difference, user_code
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    frontend_total, backend_total, user_code
+                ) VALUES (%s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE
                     frontend_total = VALUES(frontend_total),
                     backend_total = VALUES(backend_total),
-                    difference = VALUES(difference),
                     user_code = VALUES(user_code),
                     created_at = CURRENT_TIMESTAMP
                 """, (
                     batch_number, zone_code, emp_number,
-                    round(frontend_total, 2), round(backend_total, 2), 
-                    round(difference, 2), user_code
+                    frontend_total.zfill(11), backend_total.zfill(11), user_code
                 ))
                 
                 mismatches = 1
@@ -976,7 +1023,7 @@ def save_format_one():
                 db.rollback()
 
         # Log the user action
-        cur.execute("""
+        cur.execute(f"""
         INSERT INTO user_action_log 
         (user_code, sheet_name, inserted, updated, timestamp)
         VALUES (%s, %s, %s, %s, %s)
@@ -990,8 +1037,8 @@ def save_format_one():
             inserted=inserted, 
             updated=updated,
             mismatches=mismatches,
-            frontend_total=round(frontend_total, 2),
-            backend_total=round(backend_total, 2)
+            frontend_total=frontend_total.zfill(11),
+            backend_total=backend_total.zfill(11)
         )
 
     except mysql.connector.Error as db_err:
@@ -1015,8 +1062,208 @@ def save_format_one():
         if cur:
             cur.close()
         if db:
-            db.close()        
+            db.close()
 
+  
+
+@app.route('/delete-format-one', methods=['DELETE'])
+def delete_format_one():
+    """Delete records from Cfile tables based on parameters"""
+    db = None
+    cur = None
+    try:
+        # Get parameters from request
+        batch_number = request.args.get('batchNumber')
+        zone_code = request.args.get('zoneCode')
+        emp_number = request.args.get('empNumber')
+        member_number = request.args.get('memberNumber')
+
+        # Validate required parameters
+        if not all([batch_number, zone_code, emp_number, member_number]):
+            return jsonify(success=False, message="Missing required parameters"), 400
+
+        db = get_db()
+        cur = db.cursor()
+
+        # Format parameters for Cfile (Format One)
+        formatted_batch = batch_number.zfill(7)  # Cfile uses 7-digit batch
+        formatted_zone = zone_code.upper()
+        formatted_emp = emp_number.zfill(6)
+        formatted_member = member_number.zfill(6)
+
+        # Find all Cfile tables
+        cur.execute("SHOW TABLES LIKE '%Cfile'")
+        cfile_tables = [table[0] for table in cur.fetchall()]
+
+        deleted = 0
+        for table in cfile_tables:
+            cur.execute(f"""
+                DELETE FROM `{table}`
+                WHERE batch_number = %s
+                  AND zone_code = %s
+                  AND emp_number = %s
+                  AND member_number = %s
+            """, (formatted_batch, formatted_zone, formatted_emp, formatted_member))
+            deleted += cur.rowcount
+
+        db.commit()
+
+        if deleted > 0:
+            return jsonify(
+                success=True,
+                message=f"Deleted {deleted} record(s) from Cfile tables",
+                deleted_count=deleted
+            )
+        else:
+            return jsonify(success=False, message="No matching records found"), 404
+
+    except Exception as e:
+        if db:
+            db.rollback()
+        return jsonify(success=False, message=f"Error deleting record: {str(e)}"), 500
+    finally:
+        if cur:
+            cur.close()
+        if db:
+            db.close()
+
+@app.route('/delete-format-two', methods=['DELETE'])
+def delete_format_two():
+    """Delete records from Mfile table based on parameters"""
+    db = None
+    cur = None
+    try:
+        # Get parameters from request
+        batch_number = request.args.get('batchNumber')
+        zone_code = request.args.get('zoneCode')
+        emp_number = request.args.get('empNumber')
+        member_number = request.args.get('memberNumber')
+
+        # Validate required parameters
+        if not all([batch_number, zone_code, emp_number, member_number]):
+            return jsonify(success=False, message="Missing required parameters"), 400
+
+        db = get_db()
+        cur = db.cursor()
+
+        # Format parameters for Mfile (Format Two)
+        formatted_batch = batch_number.ljust(8)  # Mfile uses 8-char batch
+        formatted_zone = zone_code.upper()
+        formatted_emp = emp_number.zfill(6)
+        formatted_member = member_number.zfill(6)
+
+        # Find the specific Mfile table
+        table_name = f"{batch_number}Mfile"
+
+        # Verify table exists
+        cur.execute("SHOW TABLES LIKE %s", (table_name,))
+        if not cur.fetchone():
+            return jsonify(success=False, message="Mfile table not found"), 404
+
+        # Delete the record
+        cur.execute(f"""
+            DELETE FROM `{table_name}`
+            WHERE batch_number = %s
+              AND zone_code = %s
+              AND emp_number = %s
+              AND member_number = %s
+        """, (formatted_batch, formatted_zone, formatted_emp, formatted_member))
+
+        deleted = cur.rowcount
+        db.commit()
+
+        if deleted > 0:
+            return jsonify(
+                success=True,
+                message=f"Deleted {deleted} record(s) from Mfile table",
+                deleted_count=deleted
+            )
+        else:
+            return jsonify(success=False, message="No matching records found"), 404
+
+    except Exception as e:
+        if db:
+            db.rollback()
+        return jsonify(success=False, message=f"Error deleting record: {str(e)}"), 500
+    finally:
+        if cur:
+            cur.close()
+        if db:
+            db.close()
+
+@app.route('/check-format-one-errors', methods=['GET'])
+def check_format_one_errors():
+    sheet_name = request.args.get('sheetName')
+    if not sheet_name:
+        return jsonify(success=False, message="Sheet name is required"), 400
+
+    try:
+        db = get_db()
+        cur = db.cursor(dictionary=True)
+        
+        table_name = f"{sheet_name}Cfile"
+        cur.execute("SHOW TABLES LIKE %s", (table_name,))
+        if not cur.fetchone():
+            return jsonify(success=False, message=f"Table {table_name} not found"), 404
+        
+        # Find records with empty/0000 page_no OR empty/000000 cont_period
+        cur.execute(f"""
+            SELECT 
+                id,
+                batch_number,
+                zone_code,
+                emp_number,
+                member_number,
+                CASE
+                    WHEN (page_no IS NULL OR page_no = '' OR page_no = '0000') 
+                         AND (cont_period IS NULL OR cont_period = '' OR cont_period = '000000')
+                    THEN '000000'
+                    WHEN cont_period IS NULL OR cont_period = '' OR cont_period = '000000'
+                    THEN '-'
+                    ELSE cont_period
+                END as cont_period,
+                CASE
+                    WHEN (page_no IS NULL OR page_no = '' OR page_no = '0000') 
+                         AND (cont_period IS NULL OR cont_period = '' OR cont_period = '000000')
+                    THEN '0000'
+                    WHEN page_no IS NULL OR page_no = '' OR page_no = '0000'
+                    THEN '-'
+                    ELSE page_no
+                END as page_no,
+                CASE
+                    WHEN (page_no IS NULL OR page_no = '' OR page_no = '0000') 
+                         AND (cont_period IS NULL OR cont_period = '' OR cont_period = '000000')
+                    THEN 'Both cont_period and page_no are invalid (000000/0000)'
+                    WHEN page_no IS NULL OR page_no = '' OR page_no = '0000'
+                    THEN 'Page number is invalid (0000)'
+                    WHEN cont_period IS NULL OR cont_period = '' OR cont_period = '000000'
+                    THEN 'Contribution period is invalid (000000)'
+                END as details,
+                CASE
+                    WHEN (page_no IS NULL OR page_no = '' OR page_no = '0000') 
+                         AND (cont_period IS NULL OR cont_period = '' OR cont_period = '000000')
+                    THEN 'both'
+                    WHEN page_no IS NULL OR page_no = '' OR page_no = '0000'
+                    THEN 'page_no'
+                    WHEN cont_period IS NULL OR cont_period = '' OR cont_period = '000000'
+                    THEN 'cont_period'
+                END as error_type
+            FROM `{table_name}`
+            WHERE (page_no IS NULL OR page_no = '' OR page_no = '0000')
+               OR (cont_period IS NULL OR cont_period = '' OR cont_period = '000000')
+        """)
+        
+        errors = cur.fetchall()
+        return jsonify(success=True, errors=errors)
+        
+    except Exception as e:
+        return jsonify(success=False, message=str(e)), 500
+    finally:
+        if cur:
+            cur.close()
+        if db:
+            db.close()
+                                  
 @app.route('/download-cfile', methods=['GET'])
 def download_cfile():
     sheet_name = request.args.get('sheetName')
@@ -1051,7 +1298,14 @@ def download_cfile():
         ORDER BY batch_number, zone_code, emp_number, member_number
         """)
         
-        file_data = cur.fetchall()
+        file_data = []
+        for row in cur.fetchall():
+            # Process cont_period - replace '000000' with 6 spaces
+            processed_row = dict(row)
+            if processed_row['cont_period'] == '000000':
+                processed_row['cont_period'] = ' ' * 6
+            
+            file_data.append(processed_row)
         
         return jsonify(
             success=True,
@@ -1108,6 +1362,161 @@ def get_cfile_row_count():
             cur.close()
         if db:
             db.close()
+
+@app.route('/get-grouped-records', methods=['GET'])
+def get_grouped_records():
+    sheet_name = request.args.get('sheetName')
+    if not sheet_name:
+        return jsonify(success=False, message="Sheet name is required"), 400
+
+    db = None
+    cur = None
+    try:
+        db = get_db()
+        cur = db.cursor(dictionary=True)
+        
+        table_name = f"{sheet_name}Cfile"
+        
+        # Check if table exists
+        cur.execute("SHOW TABLES LIKE %s", (table_name,))
+        if not cur.fetchone():
+            return jsonify(success=False, message=f"Table {table_name} does not exist"), 404
+        
+        # Get grouped records with count
+        cur.execute(f"""
+        SELECT 
+            zone_code,
+            emp_number,
+            COUNT(*) as record_count,
+            CONCAT(zone_code, emp_number, ' (', COUNT(*), ')') as label
+        FROM `{table_name}`
+        GROUP BY zone_code, emp_number
+        ORDER BY zone_code, emp_number
+        """)
+        
+        groups = cur.fetchall()
+        
+        return jsonify(
+            success=True,
+            groups=groups
+        )
+        
+    except Exception as e:
+        return jsonify(
+            success=False,
+            message=f"Error getting grouped records: {str(e)}"
+        ), 500
+    finally:
+        if cur:
+            cur.close()
+        if db:
+            db.close()
+@app.route('/get-saved-records', methods=['GET'])
+def get_saved_records():
+    sheet_name = request.args.get('sheetName')
+    zone_code = request.args.get('zoneCode')
+    emp_number = request.args.get('empNumber')
+    
+    if not all([sheet_name, zone_code, emp_number]):
+        return jsonify(success=False, message="Missing parameters"), 400
+
+    db = None
+    cur = None
+    try:
+        db = get_db()
+        cur = db.cursor(dictionary=True)
+        
+        table_name = f"{sheet_name}Cfile"
+        
+        # Check if table exists
+        cur.execute("SHOW TABLES LIKE %s", (table_name,))
+        if not cur.fetchone():
+            return jsonify(success=False, message=f"Table {table_name} does not exist"), 404
+        
+        # Get records for this zone and emp number
+        cur.execute(f"""
+        SELECT 
+            batch_number,
+            zone_code,
+            emp_number,
+            cont_period,
+            member_number,
+            record_id,
+            page_no,
+            contribution
+        FROM `{table_name}`
+        WHERE zone_code = %s AND emp_number = %s
+        ORDER BY member_number
+        """, (zone_code, emp_number))
+        
+        records = cur.fetchall()
+        
+        return jsonify(
+            success=True,
+            records=records
+        )
+        
+    except Exception as e:
+        return jsonify(
+            success=False,
+            message=f"Error getting saved records: {str(e)}"
+        ), 500
+    finally:
+        if cur:
+            cur.close()
+        if db:
+            db.close()
+@app.route('/check-existing-records', methods=['POST'])
+def check_existing_records():
+    data = request.get_json()
+    sheet_name = data.get('sheetName')
+    records = data.get('records', [])
+    
+    if not sheet_name:
+        return jsonify(success=False, message="Sheet name is required"), 400
+
+    db = None
+    cur = None
+    try:
+        db = get_db()
+        cur = db.cursor()
+        
+        table_name = f"{sheet_name}Cfile"
+        
+        # Check if table exists
+        cur.execute("SHOW TABLES LIKE %s", (table_name,))
+        if not cur.fetchone():
+            return jsonify(success=True, existingRecords=[])
+        
+        # Get all existing composite keys
+        existing_records = []
+        for record in records:
+            cur.execute(f"""
+                SELECT 1 FROM `{table_name}`
+                WHERE batch_number = %s
+                AND zone_code = %s
+                AND emp_number = %s
+                AND member_number = %s
+                LIMIT 1
+            """, (
+                record['batchNumber'],
+                record['zoneCode'],
+                record['empNumber'],
+                record['memberNumber']
+            ))
+            if cur.fetchone():
+                composite_key = f"{record['zoneCode']}{record['empNumber']}{record['memberNumber']}"
+                existing_records.append(composite_key)
+        
+        return jsonify(success=True, existingRecords=existing_records)
+        
+    except Exception as e:
+        return jsonify(success=False, message=str(e)), 500
+    finally:
+        if cur:
+            cur.close()
+        if db:
+            db.close()      
 @app.route('/get-mismatch-batches', methods=['GET'])
 def get_mismatch_batches():
     db = None
@@ -1197,6 +1606,8 @@ def download_mismatch_pdf():
     if batch_number.endswith('_mismatches'):
         batch_number = batch_number.replace('_mismatches', '')
 
+    db = None
+    cursor = None
     try:
         db = get_db()
         cursor = db.cursor(dictionary=True)
@@ -1204,20 +1615,21 @@ def download_mismatch_pdf():
         table_name = f"{batch_number}_mismatches"
         
         # Check if table exists
-        cursor.execute("""
-            SELECT COUNT(*) as table_exists 
-            FROM information_schema.tables 
-            WHERE table_schema = DATABASE() AND table_name = %s
-        """, (table_name,))
-        
-        if not cursor.fetchone()['table_exists']:
+        cursor.execute("SHOW TABLES LIKE %s", (table_name,))
+        if not cursor.fetchone():
             return jsonify({"success": False, "message": f"No mismatch data found for batch {batch_number}"}), 404
 
         # Get all rows
         cursor.execute(f"""
-            SELECT batch_number, zone_code, emp_number, 
-                   frontend_total, backend_total, difference,
-                   user_code
+            SELECT 
+                batch_number, 
+                zone_code, 
+                emp_number, 
+                frontend_total, 
+                backend_total,
+                user_code,
+                created_at,
+                CAST(frontend_total AS DECIMAL(20,2)) - CAST(backend_total AS DECIMAL(20,2)) AS difference
             FROM `{table_name}`
         """)
         rows = cursor.fetchall()
@@ -1236,7 +1648,7 @@ def download_mismatch_pdf():
         pdf.cell(200, 10, txt=f"Generated on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", ln=1)
         pdf.ln(10)
 
-        # Table headers (removed Date column)
+        # Table headers
         headers = ["Batch", "Zone", "Emp No", "Frontend Total", "Backend Total", "Difference", "Reported By"]
         col_widths = [20, 15, 20, 30, 30, 25, 25]
 
@@ -1247,10 +1659,10 @@ def download_mismatch_pdf():
         pdf.ln()
 
         # Table rows
-        pdf.set_fill_color(255, 255, 255)
         for row in rows:
-            # Highlight rows with difference
-            if row['difference'] != 0:
+            # Set fill color based on difference
+            difference = float(row['difference'])
+            if difference != 0:
                 pdf.set_fill_color(255, 200, 200)  # Light red for mismatches
             else:
                 pdf.set_fill_color(200, 255, 200)  # Light green for matches
@@ -1258,11 +1670,12 @@ def download_mismatch_pdf():
             pdf.cell(col_widths[0], 10, row['batch_number'], 1, 0, 'C', 1)
             pdf.cell(col_widths[1], 10, row['zone_code'], 1, 0, 'C', 1)
             pdf.cell(col_widths[2], 10, row['emp_number'], 1, 0, 'C', 1)
-            pdf.cell(col_widths[3], 10, f"{row['frontend_total']:.2f}", 1, 0, 'R', 1)
-            pdf.cell(col_widths[4], 10, f"{row['backend_total']:.2f}", 1, 0, 'R', 1)
-            pdf.cell(col_widths[5], 10, f"{row['difference']:.2f}", 1, 0, 'R', 1)
+            pdf.cell(col_widths[3], 10, row['frontend_total'], 1, 0, 'R', 1)
+            pdf.cell(col_widths[4], 10, row['backend_total'], 1, 0, 'R', 1)
+            pdf.cell(col_widths[5], 10, f"{difference:.2f}", 1, 0, 'R', 1)
             pdf.cell(col_widths[6], 10, row['user_code'], 1, 0, 'C', 1)
             pdf.ln()
+            pdf.set_fill_color(255, 255, 255)  # Reset fill color
 
         # Create PDF in memory
         pdf_bytes = pdf.output(dest='S').encode('latin-1')
@@ -1283,9 +1696,9 @@ def download_mismatch_pdf():
             "error": str(e)
         }), 500
     finally:
-        if 'cursor' in locals():
+        if cursor:
             cursor.close()
-        if 'db' in locals():
+        if db:
             db.close()
 
 @app.route('/download-mismatch-excel', methods=['GET'])
@@ -1298,6 +1711,8 @@ def download_mismatch_excel():
     if batch_number.endswith('_mismatches'):
         batch_number = batch_number.replace('_mismatches', '')
 
+    db = None
+    cursor = None
     try:
         db = get_db()
         cursor = db.cursor(dictionary=True)
@@ -1305,20 +1720,20 @@ def download_mismatch_excel():
         table_name = f"{batch_number}_mismatches"
         
         # Check if table exists
-        cursor.execute("""
-            SELECT COUNT(*) as table_exists 
-            FROM information_schema.tables 
-            WHERE table_schema = DATABASE() AND table_name = %s
-        """, (table_name,))
-        
-        if not cursor.fetchone()['table_exists']:
+        cursor.execute("SHOW TABLES LIKE %s", (table_name,))
+        if not cursor.fetchone():
             return jsonify({"success": False, "message": f"No mismatch data found for batch {batch_number}"}), 404
 
-        # Get all rows (removed created_at from query)
+        # Get all rows with calculated difference
         cursor.execute(f"""
-            SELECT batch_number, zone_code, emp_number, 
-                   frontend_total, backend_total, difference,
-                   user_code
+            SELECT 
+                batch_number, 
+                zone_code, 
+                emp_number, 
+                frontend_total, 
+                backend_total,
+                user_code,
+                CAST(frontend_total AS DECIMAL(20,2)) - CAST(backend_total AS DECIMAL(20,2)) AS difference
             FROM `{table_name}`
         """)
         rows = cursor.fetchall()
@@ -1331,7 +1746,7 @@ def download_mismatch_excel():
         ws = wb.active
         ws.title = "Mismatch Report"
 
-        # Headers (removed Date column)
+        # Headers
         headers = ["Batch", "Zone", "Emp No", "Frontend Total", "Backend Total", "Difference", "Reported By"]
         ws.append(headers)
 
@@ -1346,7 +1761,6 @@ def download_mismatch_excel():
         # Define fill patterns
         red_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
         green_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
-        white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
 
         # Add data rows
         for row in rows:
@@ -1361,20 +1775,19 @@ def download_mismatch_excel():
             ])
 
         # Apply conditional formatting
-        for row in ws.iter_rows(min_row=2, max_row=len(rows)+1, min_col=6, max_col=6):
-            for cell in row:
-                if cell.value < 0:
-                    cell.fill = red_fill
-                elif cell.value > 0:
-                    cell.fill = green_fill
-                else:
-                    cell.fill = white_fill
-                cell.number_format = '0.00'
+        for row_idx in range(2, len(rows) + 2):
+            difference_cell = ws.cell(row=row_idx, column=6)
+            difference = float(difference_cell.value)
+            
+            if difference < 0:
+                difference_cell.fill = red_fill
+            elif difference > 0:
+                difference_cell.fill = green_fill
 
         # Format number columns
-        for col in [4, 5, 6]:  # Frontend, Backend, Difference columns
-            for row in ws.iter_rows(min_row=2, max_row=len(rows)+1, min_col=col, max_col=col):
-                for cell in row:
+        for row in ws.iter_rows(min_row=2, max_row=len(rows)+1):
+            for cell in row:
+                if cell.column_letter in ['D', 'E', 'F']:  # Numeric columns
                     cell.number_format = '0.00'
 
         # Auto-size columns
@@ -1383,7 +1796,8 @@ def download_mismatch_excel():
             column_letter = column[0].column_letter
             for cell in column:
                 try:
-                    max_length = max(max_length, len(str(cell.value)))
+                    if cell.value:
+                        max_length = max(max_length, len(str(cell.value)))
                 except:
                     pass
             adjusted_width = (max_length + 2) * 1.2
@@ -1409,12 +1823,13 @@ def download_mismatch_excel():
             "error": str(e)
         }), 500
     finally:
-        if 'cursor' in locals():
+        if cursor:
             cursor.close()
-        if 'db' in locals():
+        if db:
             db.close()
+            
     # === Save Format Two Data ===
-@app.route("/save-format-two", methods=["POST"])
+@app.route('/save-format-two', methods=['POST'])
 def save_format_two():
     db = None
     cur = None
@@ -1423,15 +1838,15 @@ def save_format_two():
         if not data:
             return jsonify(success=False, message="No data received"), 400
 
-        required_fields = ['sheetName', 'userCode', 'rows']
+        required_fields = ['batchNumber', 'userCode', 'rows']
         for field in required_fields:
             if field not in data:
                 return jsonify(success=False, message=f"Missing required field: {field}"), 400
 
-        sheet_name = data['sheetName']
-        rows = data['rows']
+        batch_number = data['batchNumber']
         user_code = data['userCode']
-        table_name = f"{sheet_name}Mfile"
+        rows = data['rows']
+        table_name = f"{batch_number}Mfile"
 
         db = get_db()
         cur = db.cursor(dictionary=True)
@@ -1440,17 +1855,17 @@ def save_format_two():
         cur.execute(f"""
         CREATE TABLE IF NOT EXISTS `{table_name}` (
           id INT AUTO_INCREMENT PRIMARY KEY,
-          batch_number VARCHAR(8) NOT NULL,        /* Positions 1-8 */
-          zone_code VARCHAR(1) NOT NULL,           /* Position 9 */
-          emp_number VARCHAR(6) NOT NULL,          /* Positions 10-15 */
-          member_number VARCHAR(6) NOT NULL,       /* Positions 16-21 */
-          last_name VARCHAR(40),                   /* Positions 22-61 (40 chars) */
-          initials VARCHAR(20),                    /* Positions 62-81 (20 chars) */
-          id_number VARCHAR(12),                   /* Positions 82-93 (12 chars) */
-          id_status VARCHAR(1),                    /* Position 94 */
-          mem_status VARCHAR(1),                   /* Position 95 */
-          operation_code VARCHAR(1),               /* Position 96 */
-          full_name VARCHAR(100),                  /* Positions 97-196 (100 chars) */
+          batch_number VARCHAR(8) NOT NULL,
+          zone_code VARCHAR(1) NOT NULL,
+          emp_number VARCHAR(6) NOT NULL,
+          member_number VARCHAR(6) NOT NULL,
+          last_name VARCHAR(40),
+          initials VARCHAR(20),
+          id_number VARCHAR(12),
+          id_status VARCHAR(1),
+          mem_status VARCHAR(1),
+          operation_code VARCHAR(1),
+          full_name VARCHAR(100),
           modified_by VARCHAR(50),
           modified_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           UNIQUE KEY unique_member (batch_number, zone_code, emp_number, member_number)
@@ -1462,26 +1877,26 @@ def save_format_two():
         now = datetime.datetime.now()
 
         for row in rows:
-            # Extract and format data with fixed-width formatting
-            batch_number = str(row.get('batchNumber', '')).strip().ljust(8)[:8]       # Positions 1-8 (8 chars)
-            zone_code = str(row.get('zoneCode', '')).strip().ljust(1)[:1]             # Position 9 (1 char)
-            emp_number = str(row.get('empNumber', '')).strip().ljust(6)[:6]           # Positions 10-15 (6 chars)
-            member_number = str(row.get('memNumber', '')).strip().ljust(6)[:6]        # Positions 16-21 (6 chars)
-            last_name = str(row.get('lastName', '')).strip().ljust(40)[:40]          # Positions 22-61 (40 chars)
-            initials = str(row.get('initials', '')).strip().ljust(20)[:20]            # Positions 62-81 (20 chars)
+            # Format data
+            batch_number = str(row.get('batchNumber', '')).strip().ljust(8)[:8]
+            zone_code = str(row.get('zoneCode', '')).strip().ljust(1)[:1]
+            emp_number = str(row.get('empNumber', '')).strip().ljust(6)[:6]
+            member_number = str(row.get('memNumber', '')).strip().ljust(6)[:6]
+            last_name = str(row.get('lastName', '')).strip().ljust(40)[:40]
+            initials = str(row.get('initials', '')).strip().ljust(20)[:20]
             
-            # Special handling for ID number (Positions 82-93)
+            # Special handling for ID number
             id_number = str(row.get('idNumber', '')).strip()
             if not id_number:
-                id_number = '000000000000'  # Default empty ID
+                id_number = '000000000000'
             elif len(id_number) == 9:
-                id_number = '000' + id_number  # Pad 9-digit IDs with leading zeros
-            id_number = id_number.ljust(12)[:12]  # Ensure exactly 12 chars
+                id_number = '000' + id_number
+            id_number = id_number.ljust(12)[:12]
             
-            id_status = str(row.get('idStatus', '')).strip().ljust(1)[:1]            # Position 94 (1 char)
-            mem_status = str(row.get('memStatus', '')).strip().ljust(1)[:1]           # Position 95 (1 char)
-            operation_code = str(row.get('operationCode', '')).strip().ljust(1)[:1]   # Position 96 (1 char)
-            full_name = str(row.get('fullName', '')).strip().ljust(100)[:100]        # Positions 97-196 (100 chars)
+            id_status = str(row.get('idStatus', '')).strip().ljust(1)[:1]
+            mem_status = str(row.get('memStatus', '')).strip().ljust(1)[:1]
+            operation_code = str(row.get('operationCode', '')).strip().ljust(1)[:1]
+            full_name = str(row.get('fullName', '')).strip().ljust(100)[:100]
 
             # Check if record exists
             cur.execute(f"""
@@ -1535,7 +1950,7 @@ def save_format_two():
         INSERT INTO user_action_log 
         (user_code, sheet_name, inserted, updated, timestamp)
         VALUES (%s, %s, %s, %s, %s)
-        """, (user_code, sheet_name, inserted, updated, now))
+        """, (user_code, table_name, inserted, updated, now))
         db.commit()
 
         return jsonify(
@@ -1548,7 +1963,8 @@ def save_format_two():
     except Exception as e:
         if db:
             db.rollback()
-        return jsonify(success=False, message=str(e)), 500
+        app.logger.error(f"Error in save-format-two: {str(e)}", exc_info=True)
+        return jsonify(success=False, message=f"Internal server error: {str(e)}"), 500
 
     finally:
         if cur:
@@ -1556,6 +1972,115 @@ def save_format_two():
         if db:
             db.close()
 
+
+
+@app.route('/get-saved-mfile-records', methods=['GET'])
+def get_saved_mfile_records():
+    batch_number = request.args.get('batchNumber')
+    zone_code = request.args.get('zoneCode')
+    emp_number = request.args.get('empNumber')
+    
+    if not all([batch_number, zone_code, emp_number]):
+        return jsonify(success=False, message="Missing parameters"), 400
+
+    table_name = f"{batch_number}Mfile"
+    
+    db = None
+    cur = None
+    try:
+        db = get_db()
+        cur = db.cursor(dictionary=True)
+        
+        # Check if table exists
+        cur.execute("SHOW TABLES LIKE %s", (table_name,))
+        if not cur.fetchone():
+            return jsonify(success=False, message=f"Table {table_name} does not exist"), 404
+        
+        # Get records for this zone and emp number
+        cur.execute(f"""
+        SELECT 
+            batch_number,
+            zone_code,
+            emp_number,
+            member_number,
+            last_name,
+            initials,
+            id_number,
+            id_status,
+            mem_status,
+            operation_code,
+            full_name
+        FROM `{table_name}`
+        WHERE zone_code = %s AND emp_number = %s
+        ORDER BY member_number
+        """, (zone_code, emp_number))
+        
+        records = cur.fetchall()
+        
+        return jsonify(
+            success=True,
+            records=records
+        )
+        
+    except Exception as e:
+        return jsonify(
+            success=False,
+            message=f"Error getting saved records: {str(e)}"
+        ), 500
+    finally:
+        if cur:
+            cur.close()
+        if db:
+            db.close()
+
+@app.route('/get-grouped-mfile-records', methods=['GET'])
+def get_grouped_mfile_records():
+    batch_number = request.args.get('batchNumber')
+    if not batch_number:
+        return jsonify(success=False, message="Batch number is required"), 400
+
+    table_name = f"{batch_number}Mfile"
+    
+    db = None
+    cur = None
+    try:
+        db = get_db()
+        cur = db.cursor(dictionary=True)
+        
+        # Check if table exists
+        cur.execute("SHOW TABLES LIKE %s", (table_name,))
+        if not cur.fetchone():
+            return jsonify(success=False, message=f"Table {table_name} does not exist"), 404
+        
+        # Get grouped records with count
+        cur.execute(f"""
+        SELECT 
+            zone_code,
+            emp_number,
+            COUNT(*) as record_count,
+            CONCAT(zone_code, emp_number, ' (', COUNT(*), ')') as label
+        FROM `{table_name}`
+        GROUP BY zone_code, emp_number
+        ORDER BY zone_code, emp_number
+        """)
+        
+        groups = cur.fetchall()
+        
+        return jsonify(
+            success=True,
+            groups=groups
+        )
+        
+    except Exception as e:
+        return jsonify(
+            success=False,
+            message=f"Error getting grouped records: {str(e)}"
+        ), 500
+    finally:
+        if cur:
+            cur.close()
+        if db:
+            db.close()
 @app.route('/get-mfile-row-count', methods=['GET'])
 def get_mfile_row_count():
     sheet_name = request.args.get('sheetName')
@@ -1671,13 +2196,17 @@ def download_mfile():
         if cur: cur.close()
         if db: db.close()
         
-@app.route('/get-company-address', methods=['GET'])
-def get_company_address():
+@app.route('/validate-company-address', methods=['GET'])
+def validate_company_address():
     batch_number = request.args.get('batchNumber')
     zone_code = request.args.get('zoneCode')
+    emp_number = request.args.get('empNumber')
     
-    if not batch_number or not zone_code:
-        return jsonify({"success": False, "message": "Missing parameters"}), 400
+    if not batch_number or not zone_code or not emp_number:
+        return jsonify({
+            "success": False,
+            "message": "Batch number, zone code and employee number are required"
+        }), 400
 
     db = get_db()
     cursor = db.cursor(dictionary=True)
@@ -1686,23 +2215,27 @@ def get_company_address():
         cursor.execute("""
             SELECT company_name 
             FROM sheet_tables 
-            WHERE batch_number LIKE %s AND zone_code = %s
+            WHERE batch_number = %s 
+            AND zone_code = %s
+            AND emp_number = %s
             LIMIT 1
-        """, (f"%{batch_number}%", zone_code))
+        """, (batch_number, zone_code, emp_number))
         
         result = cursor.fetchone()
         
-        if result and result.get('company_name'):
+        if result:
             return jsonify({
                 "success": True,
+                "valid": True,
                 "address": result['company_name']
             })
+        else:
+            return jsonify({
+                "success": True,
+                "valid": False,
+                "address": "No matching record found"
+            })
             
-        return jsonify({
-            "success": True,
-            "address": "Address not available"
-        })
-        
     except Exception as e:
         return jsonify({
             "success": False,

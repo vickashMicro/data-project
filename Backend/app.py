@@ -705,6 +705,7 @@ def get_group_labels():
         if db:
             db.close()
 
+
 @app.route('/get-members-by-label', methods=['GET'])
 @app.route('/get-members-by-label', methods=['GET'])
 def get_members_by_label():
@@ -1339,23 +1340,23 @@ def get_cfile_row_count():
 def get_grouped_records():
     sheet_name = request.args.get('sheetName')
     if not sheet_name:
-        return jsonify({"success": False, "message": "Sheet name is required"}), 400
+        return jsonify(success=False, message="Sheet name is required"), 400
 
     db = None
-    cursor = None
+    cur = None
     try:
         db = get_db()
-        cursor = db.cursor(dictionary=True)
+        cur = db.cursor(dictionary=True)
         
         table_name = f"{sheet_name}Cfile"
         
         # Check if table exists
-        cursor.execute("SHOW TABLES LIKE %s", (table_name,))
-        if not cursor.fetchone():
-            return jsonify({"success": False, "message": f"Table {table_name} does not exist"}), 404
+        cur.execute("SHOW TABLES LIKE %s", (table_name,))
+        if not cur.fetchone():
+            return jsonify(success=False, message=f"Table {table_name} does not exist"), 404
         
-        # Get grouped records with count, sorted properly
-        cursor.execute(f"""
+        # Get grouped records with count
+        cur.execute(f"""
         SELECT 
             zone_code,
             emp_number,
@@ -1363,30 +1364,26 @@ def get_grouped_records():
             CONCAT(zone_code, emp_number, ' (', COUNT(*), ')') as label
         FROM `{table_name}`
         GROUP BY zone_code, emp_number
-        ORDER BY 
-            zone_code ASC,
-            LENGTH(emp_number) ASC,
-            emp_number ASC
+        ORDER BY zone_code, emp_number
         """)
         
-        groups = cursor.fetchall()
+        groups = cur.fetchall()
         
-        return jsonify({
-            "success": True,
-            "groups": groups
-        })
+        return jsonify(
+            success=True,
+            groups=groups
+        )
         
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": f"Error getting grouped records: {str(e)}"
-        }), 500
+        return jsonify(
+            success=False,
+            message=f"Error getting grouped records: {str(e)}"
+        ), 500
     finally:
-        if cursor:
-            cursor.close()
+        if cur:
+            cur.close()
         if db:
             db.close()
-            
 @app.route('/get-saved-records', methods=['GET'])
 def get_saved_records():
     sheet_name = request.args.get('sheetName')

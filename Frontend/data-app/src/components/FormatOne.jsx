@@ -296,15 +296,26 @@ const FormatOne = ({ userCode }) => {
     // Validate all fields first
     for (let i = 0; i < sheetData.length; i++) {
       const row = sheetData[i];
+
+      // Skip validation for these fields
+      const skipFields = ['total', 'recordID', 'salary', 'batchNumber'];
+
       for (const [field, value] of Object.entries(row)) {
-        if (field === 'total' || field === 'recordID' || field === 'salary') continue;
+        if (skipFields.includes(field)) continue;
+
         if (!validateField(field, value)) {
           alert(`Invalid value in row ${i + 1}, field "${field}". Please correct before saving.`);
           return;
         }
       }
+
       if (!row.contribution || isNaN(row.contribution) || parseFloat(row.contribution) <= 0) {
         alert(`Invalid contribution amount in row ${i + 1}. Please enter a valid positive number.`);
+        return;
+      }
+
+      if (!row.contributed || row.contributed.length !== 6) {
+        alert(`Invalid contribution period in row ${i + 1}. Format should be YYYYMM.`);
         return;
       }
     }
@@ -344,7 +355,10 @@ const FormatOne = ({ userCode }) => {
       });
 
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Failed to save data");
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to save data");
+      }
 
       if (result.success) {
         setSaveResult({
@@ -365,18 +379,26 @@ const FormatOne = ({ userCode }) => {
               if (data.success) setGroupedRecords(data.groups);
             });
         }
+
+        // Auto-refresh after 3 seconds
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       } else {
         alert(`❌ Failed to save data: ${result.message}`);
       }
-
     } catch (err) {
       console.error("Save error:", err);
       let errorMessage = `Error saving data: ${err.message}`;
+
       if (err.message.includes("NetworkError")) {
         errorMessage = "Network error: Please check your internet connection and try again.";
       } else if (err.message.includes("Failed to fetch")) {
         errorMessage = "Server connection failed. Please try again later.";
+      } else if (err.message.includes("validation failed")) {
+        errorMessage = "Data validation failed. Please check your inputs and try again.";
       }
+
       alert(errorMessage);
     }
   };
@@ -422,14 +444,25 @@ const FormatOne = ({ userCode }) => {
             onChange={(e) => handleSearchByChange(e.target.value)}
           >
             <option value="">-- Search By : --</option>
-            {searchOptions.map((option, i) => (
-              <option key={`new-${i}`} value={option.label}>
-                {option.display || option.label}
-              </option>
-            ))}
+            {[...searchOptions]
+              .sort((a, b) => {
+          
+                const aLetter = a.charAt(0).toUpperCase();
+                const bLetter = b.charAt(0).toUpperCase();
+
+                const aNum = parseInt(a.slice(1)) || 0;
+                const bNum = parseInt(b.slice(1)) || 0;
+
+                if (aLetter < bLetter) return -1;
+                if (aLetter > bLetter) return 1;
+
+                return aNum - bNum;
+              })
+              .map((option, i) => (
+                <option key={`new-${i}`} value={option}>{option}</option>
+              ))}
           </select>
         </div>
-
         <div className="formatone-filter-group">
           <label>Saved Records</label>
           <select
@@ -437,21 +470,37 @@ const FormatOne = ({ userCode }) => {
             onChange={(e) => handleSavedRecordChange(e.target.value)}
           >
             <option value="">-- Select Saved Record --</option>
-            {groupedRecords.map((group, i) => (
-              <option key={`saved-${i}`} value={group.label}>
-                {group.label}
-              </option>
-            ))}
+            {[...groupedRecords]
+              .sort((a, b) => {
+
+                const aLabel = a.label.split(' ')[0];
+                const bLabel = b.label.split(' ')[0];
+
+                const aLetter = aLabel.charAt(0).toUpperCase();
+                const bLetter = bLabel.charAt(0).toUpperCase();
+
+                const aNum = parseInt(aLabel.slice(1)) || 0;
+                const bNum = parseInt(bLabel.slice(1)) || 0;
+                if (aLetter < bLetter) return -1;
+                if (aLetter > bLetter) return 1;
+
+                return aNum - bNum;
+              })
+              .map((group, i) => (
+                <option key={`saved-${i}`} value={group.label}>
+                  {group.label}
+                </option>
+              ))
+            }
           </select>
         </div>
-
         <div className="formatone-filter-group">
           <label>Search Bar</label>
           <div className="formatone-search-input">
             <input
               type="text"
               value={searchValue}
-              maxLength={7}
+              maxLength={12}
               onChange={(e) => setSearchValue(e.target.value.toUpperCase())}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="A000123"

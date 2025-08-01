@@ -670,69 +670,41 @@ def get_group_labels():
     cursor = None
     try:
         db = get_db()
-        cursor = db.cursor(dictionary=True)
+        cursor = db.cursor()
         
         if sheet_name:
-            # Get labels with counts from both sheet_tables and Cfile table
-            query = """
-                SELECT 
-                    st.zone_code,
-                    st.emp_number,
-                    (SELECT COUNT(*) 
-                     FROM `{sheet_name}Cfile` c 
-                     WHERE c.zone_code = st.zone_code 
-                     AND c.emp_number = st.emp_number) as record_count,
-                    CONCAT(st.zone_code, st.emp_number) as label
-                FROM sheet_tables st
-                WHERE st.sheet_name = %s
-                ORDER BY st.zone_code, st.emp_number
-            """.format(sheet_name=sheet_name)
-            cursor.execute(query, (sheet_name,))
+            cursor.execute("""
+                SELECT zone_code, emp_number 
+                FROM sheet_tables 
+                WHERE sheet_name = %s
+                ORDER BY 
+                    zone_code ASC,
+                    LENGTH(emp_number) ASC,
+                    emp_number ASC
+            """, (sheet_name,))
         else:
-            # For batch number search
-            query = """
-                SELECT 
-                    st.zone_code,
-                    st.emp_number,
-                    (SELECT COUNT(*) 
-                     FROM `{batch_number}Cfile` c 
-                     WHERE c.zone_code = st.zone_code 
-                     AND c.emp_number = st.emp_number) as record_count,
-                    CONCAT(st.zone_code, st.emp_number) as label
-                FROM sheet_tables st
-                WHERE st.batch_number = %s
-                ORDER BY st.zone_code, st.emp_number
-            """.format(batch_number=batch_number)
-            cursor.execute(query, (batch_number,))
+            cursor.execute("""
+                SELECT zone_code, emp_number 
+                FROM sheet_tables 
+                WHERE batch_number = %s
+                ORDER BY 
+                    zone_code ASC,
+                    LENGTH(emp_number) ASC,
+                    emp_number ASC
+            """, (batch_number,))
             
         results = cursor.fetchall()
-        
-        # Format the labels with counts
-        labels = []
-        for row in results:
-            label = f"{row['zone_code']}{row['emp_number']}"
-            count = row['record_count'] or 0
-            labels.append({
-                'label': label,
-                'display': f"{label} ({count})",
-                'count': count
-            })
-        
-        return jsonify({
-            "success": True, 
-            "data": labels
-        })
-        
+        labels = [f"{row[0]}{row[1]}" for row in results]
+        return jsonify({"success": True, "data": labels})
+
     except Exception as e:
-        return jsonify({
-            "success": False, 
-            "message": f"Error getting group labels: {str(e)}"
-        }), 500
+        return jsonify({"success": False, "message": f"DB Error: {str(e)}"}), 500
     finally:
         if cursor:
             cursor.close()
         if db:
             db.close()
+
 @app.route('/get-members-by-label', methods=['GET'])
 @app.route('/get-members-by-label', methods=['GET'])
 def get_members_by_label():
@@ -846,6 +818,7 @@ def delete_sheet():
         db.close()
 
 
+
 @app.route('/save-format-one', methods=['POST'])
 def save_format_one():
     db = None
@@ -883,7 +856,6 @@ def save_format_one():
         cur = db.cursor(dictionary=True)
 
         # Create table if not exists with proper schema
-        # Updated unique key to include cont_period instead of member_number
         cur.execute(f"""
         CREATE TABLE IF NOT EXISTS `{table_name}` (
           id INT AUTO_INCREMENT PRIMARY KEY,
@@ -915,21 +887,21 @@ def save_format_one():
             page_no = str(row.get('pageNo', '0')).strip().zfill(4)
             contribution = str(row.get('contribution', '0')).strip().zfill(11)
 
-            # Check if this member exists for this batch/zone/emp/cont_period combination
+            # Check if record exists
             cur.execute(f"""
             SELECT 1 FROM `{table_name}` 
             WHERE 
                 batch_number=%s AND 
                 zone_code=%s AND 
                 emp_number=%s AND 
-                cont_period=%s AND
+                cont_period=%s AND 
                 member_number=%s
             """, (batch_number, zone_code, emp_number, cont_period, member_number))
             
             exists = cur.fetchone() is not None
 
             if exists:
-                # Update existing record for this member in this period
+                # Update existing record
                 cur.execute(f"""
                 UPDATE `{table_name}` SET 
                     page_no=%s,
@@ -940,7 +912,7 @@ def save_format_one():
                     batch_number=%s AND 
                     zone_code=%s AND 
                     emp_number=%s AND 
-                    cont_period=%s AND
+                    cont_period=%s AND 
                     member_number=%s
                 """, (
                     page_no, contribution, user_code, now,
@@ -948,7 +920,7 @@ def save_format_one():
                 ))
                 updated += 1
             else:
-                # Insert new record for this member in this period
+                # Insert new record
                 cur.execute(f"""
                 INSERT INTO `{table_name}` (
                     batch_number, zone_code, emp_number, cont_period,
@@ -962,7 +934,7 @@ def save_format_one():
                 ))
                 inserted += 1
 
-        # Rest of the code remains the same...
+        # Check for contribution mismatch
         dynamic_table_name = f"{sheet_name}{zone_code}{emp_number}"
         backend_total = "00000000000"
         
@@ -1367,23 +1339,23 @@ def get_cfile_row_count():
 def get_grouped_records():
     sheet_name = request.args.get('sheetName')
     if not sheet_name:
-        return jsonify(success=False, message="Sheet name is required"), 400
+        return jsonify({"success": False, "message": "Sheet name is required"}), 400
 
     db = None
-    cur = None
+    cursor = None
     try:
         db = get_db()
-        cur = db.cursor(dictionary=True)
+        cursor = db.cursor(dictionary=True)
         
         table_name = f"{sheet_name}Cfile"
         
         # Check if table exists
-        cur.execute("SHOW TABLES LIKE %s", (table_name,))
-        if not cur.fetchone():
-            return jsonify(success=False, message=f"Table {table_name} does not exist"), 404
+        cursor.execute("SHOW TABLES LIKE %s", (table_name,))
+        if not cursor.fetchone():
+            return jsonify({"success": False, "message": f"Table {table_name} does not exist"}), 404
         
-        # Get grouped records with count
-        cur.execute(f"""
+        # Get grouped records with count, sorted properly
+        cursor.execute(f"""
         SELECT 
             zone_code,
             emp_number,
@@ -1391,26 +1363,30 @@ def get_grouped_records():
             CONCAT(zone_code, emp_number, ' (', COUNT(*), ')') as label
         FROM `{table_name}`
         GROUP BY zone_code, emp_number
-        ORDER BY zone_code, emp_number
+        ORDER BY 
+            zone_code ASC,
+            LENGTH(emp_number) ASC,
+            emp_number ASC
         """)
         
-        groups = cur.fetchall()
+        groups = cursor.fetchall()
         
-        return jsonify(
-            success=True,
-            groups=groups
-        )
+        return jsonify({
+            "success": True,
+            "groups": groups
+        })
         
     except Exception as e:
-        return jsonify(
-            success=False,
-            message=f"Error getting grouped records: {str(e)}"
-        ), 500
+        return jsonify({
+            "success": False,
+            "message": f"Error getting grouped records: {str(e)}"
+        }), 500
     finally:
-        if cur:
-            cur.close()
+        if cursor:
+            cursor.close()
         if db:
             db.close()
+            
 @app.route('/get-saved-records', methods=['GET'])
 def get_saved_records():
     sheet_name = request.args.get('sheetName')
